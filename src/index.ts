@@ -1,4 +1,5 @@
 import express, { Express, Request, Response } from "express";
+import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import UserRoutes from "./routes/user";
 import NoteRoutes from "./routes/note";
@@ -8,6 +9,10 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
+const mongoose = require("mongoose");
+mongoose.connect(process.env.MONGODB_URI);
+
+app.use(bodyParser.json());
 app.use(UserRoutes);
 app.use(NoteRoutes);
 app.get("/", (req: Request, res: Response) => {
