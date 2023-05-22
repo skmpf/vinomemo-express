@@ -1,15 +1,22 @@
 import express, { Request, Response } from "express";
+import { CustomRequest } from "../types/express";
+import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import User from "../models/User";
 import { authenticate } from "../middlewares/authMiddleware";
-import { CustomRequest } from "../types/express";
 import {
   loginValidator,
   signupValidator,
   updateUserValidator,
 } from "../utils/validators";
-import { validationResult } from "express-validator";
+import {
+  createUser,
+  deleteUser,
+  getUserByEmail,
+  getUserById,
+  getUsers,
+  updateUser,
+} from "../controllers/user";
 
 const router = express.Router();
 
@@ -21,18 +28,7 @@ router.post("/signup", signupValidator, async (req: Request, res: Response) => {
     }
 
     const { name, email, password } = req.body;
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).send("User already exists");
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    const newUser = await User.create({
-      name,
-      email,
-      passwordHash,
-    });
+    const newUser = createUser(name, email, password);
 
     const token = jwt.sign({ user: newUser }, process.env.JWT_SECRET);
     res.status(201).json({ user: newUser, token });
@@ -50,23 +46,18 @@ router.post("/login", loginValidator, async (req: Request, res: Response) => {
     }
 
     const { email, password } = req.body;
-    const existingUser = await User.findOne({ email });
-
-    if (!existingUser) {
-      return res.status(401).send("User does not exist");
-    }
+    const existingUser = await getUserByEmail(email);
 
     const isPasswordCorrect = await bcrypt.compare(
       password,
       existingUser.passwordHash
     );
-
-    if (isPasswordCorrect) {
-      const token = jwt.sign({ user: existingUser }, process.env.JWT_SECRET);
-      return res.status(200).json({ user: existingUser, token });
+    if (!isPasswordCorrect) {
+      res.status(401).send("Password is incorrect");
     }
 
-    res.status(401).send("Password is incorrect");
+    const token = jwt.sign({ user: existingUser }, process.env.JWT_SECRET);
+    return res.status(200).json({ user: existingUser, token });
   } catch (error) {
     console.error("POST /login", error);
     res.status(500).send("Internal Server Error");
@@ -78,12 +69,7 @@ router.get(
   authenticate,
   async (req: CustomRequest, res: Response) => {
     try {
-      const users = await User.find();
-
-      if (users.length === 0) {
-        return res.status(204).send("No users found");
-      }
-
+      const users = await getUsers();
       res.status(200).json(users);
     } catch (error) {
       console.error("GET /users", error);
@@ -97,12 +83,7 @@ router.get(
   authenticate,
   async (req: CustomRequest, res: Response) => {
     try {
-      const user = await User.findById(req.params.id);
-
-      if (!user) {
-        return res.status(404).send("User not found");
-      }
-
+      const user = await getUserById(req.params.id);
       res.status(200).json(user);
     } catch (error) {
       console.error(`GET /user/${req.params.id}`, error);
@@ -123,22 +104,8 @@ router.put(
       }
 
       const { name, email, password } = req.body;
-      const id = req.params.id;
-
-      if (id !== req.user._id) {
-        return res.status(401).send("Unauthorized");
-      }
-
-      const passwordHash = await bcrypt.hash(password, 10);
-
-      await User.findByIdAndUpdate(id, {
-        name,
-        email,
-        passwordHash,
-        updatedAt: Date.now(),
-      });
-
-      res.status(200).send();
+      const user = await updateUser(name, email, password);
+      res.status(200).send(user);
     } catch (error) {
       console.error(`PUT /user/${req.params.id}`, error);
       res.status(500).send("Internal Server Error");
@@ -151,14 +118,8 @@ router.delete(
   authenticate,
   async (req: CustomRequest, res: Response) => {
     try {
-      const id = req.params.id;
-
-      if (id !== req.user._id) {
-        return res.status(401).send("Unauthorized");
-      }
-
-      await User.findByIdAndDelete(req.params.id);
-      res.status(200).send();
+      const user = await deleteUser(req.params.id);
+      res.status(200).send(user);
     } catch (error) {
       console.error(`DELETE /user/${req.params.id}`, error);
       res.status(500).send("Internal Server Error");
