@@ -19,8 +19,7 @@ export const authenticate = async (
     const user = await getUserById(decoded.user._id);
     req.user = user;
     next();
-  } catch (error) {
-    console.error("Authentication failed", error);
+  } catch {
     res.status(401).send("Unauthorized");
   }
 };
