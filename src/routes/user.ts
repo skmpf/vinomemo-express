@@ -28,7 +28,7 @@ router.post("/signup", signupValidator, async (req: Request, res: Response) => {
     }
 
     const { name, email, password } = req.body;
-    const newUser = createUser(name, email, password);
+    const newUser = await createUser(name, email, password);
 
     const token = jwt.sign({ user: newUser }, process.env.JWT_SECRET);
     res.status(201).json({ user: newUser, token });
@@ -53,7 +53,7 @@ router.post("/login", loginValidator, async (req: Request, res: Response) => {
       existingUser.passwordHash
     );
     if (!isPasswordCorrect) {
-      res.status(401).send("Password is incorrect");
+      return res.status(401).send("Password is incorrect");
     }
 
     const token = jwt.sign({ user: existingUser }, process.env.JWT_SECRET);
@@ -103,8 +103,9 @@ router.put(
         return res.status(400).json({ errors: result.array() });
       }
 
+      const id = req.params.id;
       const { name, email, password } = req.body;
-      const user = await updateUser(name, email, password);
+      const user = await updateUser(id, name, email, password);
       res.status(200).send(user);
     } catch (error) {
       console.error(`PUT /user/${req.params.id}`, error);

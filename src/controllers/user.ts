@@ -8,7 +8,7 @@ export const createUser = async (
 ) => {
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) throw new Error("User already exists");
+    if (existingUser) throw new Error("User with this email already exists");
 
     const passwordHash = await bcrypt.hash(password, 10);
     const newUser = await User.create({
@@ -26,7 +26,7 @@ export const createUser = async (
 export const getUserById = async (id: string) => {
   try {
     const user = await User.findById(id);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error("User was not found");
 
     return user;
   } catch (e) {
@@ -37,7 +37,7 @@ export const getUserById = async (id: string) => {
 export const getUserByEmail = async (email: string) => {
   try {
     const existingUser = await User.findOne({ email });
-    if (!existingUser) throw new Error("User not found");
+    if (!existingUser) throw new Error("User was not found");
 
     return existingUser;
   } catch (e) {
@@ -48,7 +48,7 @@ export const getUserByEmail = async (email: string) => {
 export const getUsers = async () => {
   try {
     const users = await User.find();
-    if (users.length === 0) throw new Error("Users not found");
+    if (users.length === 0) throw new Error("Users were not found");
 
     return users;
   } catch (e) {
@@ -57,11 +57,17 @@ export const getUsers = async () => {
 };
 
 export const updateUser = async (
+  id: string,
   name: string,
   email: string,
   password: string
 ) => {
   try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== id) {
+      throw new Error("User with this email already exists");
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
 
     const user = await User.findOneAndUpdate(
@@ -73,7 +79,7 @@ export const updateUser = async (
         updatedAt: Date.now(),
       }
     );
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error("User was not found");
 
     return user;
   } catch (e) {
@@ -84,7 +90,7 @@ export const updateUser = async (
 export const deleteUser = async (id: string) => {
   try {
     const user = await User.findByIdAndDelete(id);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error("User was not found");
 
     return user;
   } catch (e) {

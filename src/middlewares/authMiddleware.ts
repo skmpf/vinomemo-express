@@ -1,25 +1,22 @@
 import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import User from "../models/User";
 import { CustomRequest } from "../types/express";
+import { getUserById } from "../controllers/user";
 
 export const authenticate = async (
   req: CustomRequest,
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
-  if (!token) {
-    return res.status(401).send("Unauthorized");
-  }
-
   try {
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token) throw new Error("Unauthorized");
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.user._id);
-    if (!user) {
-      return res.status(401).send("Unauthorized");
-    }
 
+    const id = req.params.id;
+    if (id && id !== decoded.user._id) throw new Error("Unauthorized");
+
+    const user = await getUserById(decoded.user._id);
     req.user = user;
     next();
   } catch (error) {
