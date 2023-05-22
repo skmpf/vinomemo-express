@@ -5,7 +5,7 @@ export const loginValidator = [
   body("password")
     .notEmpty()
     .trim()
-    .isLength({ min: 6, max: 20 })
+    .isLength({ min: 8, max: 20 })
     .escape()
     .withMessage("Password must be between 6 and 20 characters"),
 ];
@@ -21,7 +21,7 @@ export const updateUserValidator = [
   body("password")
     .optional()
     .trim()
-    .isLength({ min: 6, max: 20 })
+    .isLength({ min: 8, max: 20 })
     .escape()
     .withMessage("Password must be between 6 and 20 characters"),
 ];
