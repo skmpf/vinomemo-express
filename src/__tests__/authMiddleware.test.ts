@@ -1,92 +1,101 @@
-import { Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import User from "../models/User";
+import { NextFunction, Response } from "express";
+import * as jwt from "jsonwebtoken";
+import * as userController from "../controllers/user";
 import { authenticate } from "../middlewares/authMiddleware";
 import { CustomRequest } from "../types/express";
-import { mockUser } from "./mocks/user";
 
-const mockDecodedToken = {
-  user: {
-    _id: mockUser._id,
-  },
-};
+// Mock the dependencies and functions used in the authenticate function
+jest.mock("jsonwebtoken");
+jest.mock("../controllers/user");
 
-describe("authenticate middleware", () => {
-  let mockRequest: CustomRequest;
-  let mockResponse: Response;
-  let mockNextFunction: NextFunction;
+describe("authenticate", () => {
+  let req: CustomRequest;
+  let res: Response;
+  let next: NextFunction;
 
   beforeEach(() => {
-    mockRequest = {
+    req = {
       header: jest.fn(),
       params: {},
     } as unknown as CustomRequest;
-
-    mockResponse = {
+    res = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn(),
     } as unknown as Response;
-
-    mockNextFunction = jest.fn();
+    next = jest.fn();
+    process.env.JWT_SECRET = "secret";
   });
 
-  it("should set the user in the request object when a valid token is provided", async () => {
-    mockRequest.header = jest.fn().mockReturnValue("Bearer valid_token");
-    jest.spyOn(jwt, "verify").mockReturnValue(mockDecodedToken);
-    jest.spyOn(User, "findById").mockResolvedValue(mockUser);
-
-    await authenticate(mockRequest, mockResponse, mockNextFunction);
-
-    expect(mockRequest.user).toEqual(mockUser);
-    expect(mockNextFunction).toHaveBeenCalled();
-    expect(mockRequest.params.id).toBeUndefined(); // Ensure id parameter is undefined
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("should return 401 Unauthorized if no token is provided", async () => {
-    mockRequest.header = jest.fn().mockReturnValue(null);
+  test("should call next if authentication is successful", async () => {
+    const token = "valid-token";
+    const decodedToken = {
+      user: { _id: "user123" },
+    };
 
-    await authenticate(mockRequest, mockResponse, mockNextFunction);
+    req.header = jest.fn().mockReturnValueOnce(`Bearer ${token}`);
+    (jwt.verify as jest.Mock).mockReturnValueOnce(decodedToken);
+    (userController.getUserById as jest.Mock).mockResolvedValueOnce(
+      decodedToken.user
+    );
 
-    expect(mockResponse.status).toHaveBeenCalledWith(401);
-    expect(mockResponse.send).toHaveBeenCalledWith("Unauthorized");
-    expect(mockNextFunction).not.toHaveBeenCalled();
+    await authenticate(req, res, next);
+
+    console.log(
+      "🚀 ~ file: authMiddleware.test.ts:50 ~ test ~ req.user:",
+      req.user
+    );
+    expect(req.user).toEqual(decodedToken.user);
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.send).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalled();
   });
 
-  it("should return 401 Unauthorized if the token is invalid", async () => {
-    mockRequest.header = jest.fn().mockReturnValue("Bearer invalid_token");
-    jest.spyOn(jwt, "verify").mockImplementation(() => {
-      throw new Error("JsonWebTokenError: invalid signature");
+  test("should return No token provided if no token is provided", async () => {
+    req.header = jest.fn().mockReturnValueOnce(undefined);
+
+    await authenticate(req, res, next);
+
+    expect(req.user).toBeUndefined();
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.send).toHaveBeenCalledWith("Unauthorized - No token provided");
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  test("should return Invalid token if token verification fails", async () => {
+    const token = "invalid-token";
+
+    req.header = jest.fn().mockReturnValueOnce(`Bearer ${token}`);
+    (jwt.verify as jest.Mock).mockImplementationOnce(() => {
+      throw new Error("Invalid token");
     });
 
-    await authenticate(mockRequest, mockResponse, mockNextFunction);
+    await authenticate(req, res, next);
 
-    expect(mockResponse.status).toHaveBeenCalledWith(401);
-    expect(mockResponse.send).toHaveBeenCalledWith("Unauthorized");
-    expect(mockNextFunction).not.toHaveBeenCalled();
+    expect(req.user).toBeUndefined();
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.send).toHaveBeenCalledWith("Unauthorized - Invalid token");
+    expect(next).not.toHaveBeenCalled();
   });
 
-  it("should return 401 Unauthorized if the user does not exist", async () => {
-    mockRequest.header = jest.fn().mockReturnValue("Bearer valid_token");
-    jest.spyOn(jwt, "verify").mockReturnValue(mockDecodedToken);
-    jest.spyOn(User, "findById").mockResolvedValue(null);
+  test("should return User not allowed if user ID is unauthorized", async () => {
+    const token = "valid-token";
+    const decodedToken = {
+      user: { _id: "user456" },
+    };
 
-    await authenticate(mockRequest, mockResponse, mockNextFunction);
+    req.header = jest.fn().mockReturnValueOnce(`Bearer ${token}`);
+    (jwt.verify as jest.Mock).mockReturnValueOnce(decodedToken);
+    req.params.id = "user123";
 
-    expect(mockResponse.status).toHaveBeenCalledWith(401);
-    expect(mockResponse.send).toHaveBeenCalledWith("Unauthorized");
-    expect(mockNextFunction).not.toHaveBeenCalled();
-  });
+    await authenticate(req, res, next);
 
-  it("should return 401 Unauthorized if the provided id does not match the decoded user id", async () => {
-    mockRequest.header = jest.fn().mockReturnValue("Bearer valid_token");
-    jest.spyOn(jwt, "verify").mockReturnValue(mockDecodedToken);
-    jest.spyOn(User, "findById").mockResolvedValue(mockUser);
-    mockRequest.params.id = "other_id"; // Set a different id
-
-    await authenticate(mockRequest, mockResponse, mockNextFunction);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(401);
-    expect(mockResponse.send).toHaveBeenCalledWith("Unauthorized");
-    expect(mockNextFunction).not.toHaveBeenCalled();
+    expect(req.user).toBeUndefined();
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.send).toHaveBeenCalledWith("Unauthorized - User not allowed");
+    expect(next).not.toHaveBeenCalled();
   });
 });

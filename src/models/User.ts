@@ -5,8 +5,8 @@ export interface IUser extends Document {
   name: string;
   email: string;
   passwordHash: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: number;
+  updatedAt: number;
 }
 
 const userSchema = new mongoose.Schema({

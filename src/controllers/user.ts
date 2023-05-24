@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcrypt";
 import User from "../models/User";
 
 export const createUser = async (
@@ -36,10 +36,10 @@ export const getUserById = async (id: string) => {
 
 export const getUserByEmail = async (email: string) => {
   try {
-    const existingUser = await User.findOne({ email });
-    if (!existingUser) throw new Error("User was not found");
+    const user = await User.findOne({ email });
+    if (!user) throw new Error("User was not found");
 
-    return existingUser;
+    return user;
   } catch (e) {
     throw e;
   }
@@ -63,6 +63,9 @@ export const updateUser = async (
   password: string
 ) => {
   try {
+    const user = await User.findById(id);
+    if (!user) throw new Error("User was not found");
+
     const existingUser = await User.findOne({ email });
     if (existingUser && existingUser._id.toString() !== id) {
       throw new Error("User with this email already exists");
@@ -70,16 +73,11 @@ export const updateUser = async (
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await User.findOneAndUpdate(
-      { email },
-      {
-        name,
-        email,
-        passwordHash,
-        updatedAt: Date.now(),
-      }
-    );
-    if (!user) throw new Error("User was not found");
+    user.name = name;
+    user.email = email;
+    user.passwordHash = passwordHash;
+    user.updatedAt = Date.now();
+    user.save();
 
     return user;
   } catch (e) {

@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { CustomRequest } from "../types/express";
 import { getUserById } from "../controllers/user";
 
@@ -10,16 +10,16 @@ export const authenticate = async (
 ) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
-    if (!token) throw new Error("Unauthorized");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!token) throw new Error("No token provided");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
 
     const id = req.params.id;
-    if (id && id !== decoded.user._id) throw new Error("Unauthorized");
+    if (id && id !== decoded.user._id) throw new Error("User not allowed");
 
     const user = await getUserById(decoded.user._id);
     req.user = user;
     next();
-  } catch {
-    res.status(401).send("Unauthorized");
+  } catch (e) {
+    res.status(401).send(`Unauthorized - ${e.message}`);
   }
 };
