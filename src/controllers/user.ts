@@ -23,9 +23,9 @@ export const createUser = async (
   }
 };
 
-export const getUserById = async (id: string) => {
+export const getUserById = async (userId: string) => {
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(userId);
     if (!user) throw new Error("User was not found");
 
     return user;
@@ -57,17 +57,17 @@ export const getUsers = async () => {
 };
 
 export const updateUser = async (
-  id: string,
+  userId: string,
   name: string,
   email: string,
   password: string
 ) => {
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(userId);
     if (!user) throw new Error("User was not found");
 
     const existingUser = await User.findOne({ email });
-    if (existingUser && existingUser._id.toString() !== id) {
+    if (existingUser && existingUser._id.toString() !== userId) {
       throw new Error("User with this email already exists");
     }
 
@@ -76,7 +76,7 @@ export const updateUser = async (
     user.name = name;
     user.email = email;
     user.passwordHash = passwordHash;
-    user.updatedAt = Date.now();
+    user.updatedAt = new Date();
     user.save();
 
     return user;
@@ -85,9 +85,9 @@ export const updateUser = async (
   }
 };
 
-export const deleteUser = async (id: string) => {
+export const deleteUser = async (userId: string) => {
   try {
-    const user = await User.findByIdAndDelete(id);
+    const user = await User.findByIdAndDelete(userId);
     if (!user) throw new Error("User was not found");
 
     return user;

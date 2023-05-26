@@ -31,7 +31,7 @@ describe("authenticate", () => {
     jest.clearAllMocks();
   });
 
-  test("should throw an error if no token is provided", async () => {
+  it("should throw an error if no token is provided", async () => {
     await authenticate(req, res, next);
 
     expect(req.header).toHaveBeenCalledWith("Authorization");
@@ -40,7 +40,7 @@ describe("authenticate", () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test("should throw an error if the id in the token does not match the id in the request params", async () => {
+  it("should throw an error if the id in the token does not match the id in the request params", async () => {
     const decodedToken = {
       user: { _id: "user123" },
     };
@@ -57,7 +57,7 @@ describe("authenticate", () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test("should authenticate and call next if a valid token is provided with matching user ID", async () => {
+  it("should authenticate and call next if a valid token is provided with matching user ID", async () => {
     const decodedToken = {
       user: { _id: "user123" },
     };

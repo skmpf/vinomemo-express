@@ -56,9 +56,11 @@ describe("User Controller", () => {
     it("should get a user by ID", async () => {
       (User.findById as jest.Mock).mockResolvedValueOnce(mockUser);
 
-      await expect(getUserById(mockUser._id)).resolves.toEqual(mockUser);
+      await expect(getUserById(mockUser._id.toString())).resolves.toEqual(
+        mockUser
+      );
 
-      expect(User.findById).toHaveBeenCalledWith(mockUser._id);
+      expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
     });
 
     it("should throw an error when getting a user by non-existent ID", async () => {
@@ -131,16 +133,21 @@ describe("User Controller", () => {
       (User.findOne as jest.Mock).mockResolvedValueOnce(null);
       (bcrypt.hash as jest.Mock).mockResolvedValueOnce("newhashedpassword");
 
-      const updatedUser = await updateUser(mockUser._id, name, email, password);
+      const updatedUser = await updateUser(
+        mockUser._id.toString(),
+        name,
+        email,
+        password
+      );
 
       expect(updatedUser).toEqual({
         ...mockUser,
         password,
         passwordHash: "newhashedpassword",
-        updatedAt: expect.any(Number),
+        updatedAt: expect.any(Date),
         save: expect.any(Function),
       });
-      expect(User.findById).toHaveBeenCalledWith(mockUser._id);
+      expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
       expect(User.findOne).toHaveBeenCalledWith({ email });
       expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
       expect(updatedUser.save).toHaveBeenCalled();
@@ -156,10 +163,10 @@ describe("User Controller", () => {
       (User.findOne as jest.Mock).mockResolvedValueOnce({ _id: id });
 
       await expect(
-        updateUser(mockUser._id, name, email, password)
+        updateUser(mockUser._id.toString(), name, email, password)
       ).rejects.toThrow("User with this email already exists");
 
-      expect(User.findById).toHaveBeenCalledWith(mockUser._id);
+      expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
       expect(User.findOne).toHaveBeenCalledWith({ email });
       expect(bcrypt.hash).not.toHaveBeenCalled();
     });
@@ -185,9 +192,13 @@ describe("User Controller", () => {
     it("should delete a user", async () => {
       (User.findByIdAndDelete as jest.Mock).mockResolvedValueOnce(mockUser);
 
-      await expect(deleteUser(mockUser._id)).resolves.toEqual(mockUser);
+      await expect(deleteUser(mockUser._id.toString())).resolves.toEqual(
+        mockUser
+      );
 
-      expect(User.findByIdAndDelete).toHaveBeenCalledWith(mockUser._id);
+      expect(User.findByIdAndDelete).toHaveBeenCalledWith(
+        mockUser._id.toString()
+      );
     });
 
     it("should throw an error when deleting a non-existent user", async () => {

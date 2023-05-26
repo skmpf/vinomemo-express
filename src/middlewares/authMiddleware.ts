@@ -11,7 +11,7 @@ export const authenticate = async (
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
     if (!token) throw new Error("No token provided");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
     const id = req.params.id;
     if (id && id !== decoded.user._id) throw new Error("User not allowed");
@@ -20,6 +20,6 @@ export const authenticate = async (
     req.user = user;
     next();
   } catch (e) {
-    res.status(401).send(`Unauthorized - ${e.message}`);
+    res.status(401).send(`Unauthorized - ${(e as Error).message}`);
   }
 };
