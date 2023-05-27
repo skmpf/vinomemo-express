@@ -1,5 +1,5 @@
 import * as bcrypt from "bcrypt";
-import User from "../models/User";
+import User from "./user.model";
 
 export const createUser = async (
   name: string,

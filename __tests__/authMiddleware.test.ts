@@ -1,14 +1,14 @@
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
-import { getUserById } from "../controllers/user";
-import { authenticate } from "../middlewares/authMiddleware";
-import { CustomRequest } from "../types/express";
+import { getUserById } from "../server/api/user/user.controller";
+import { authenticate } from "../server/middleware/authMiddleware";
+import { CustomRequest } from "../server/types/express";
 
 // Mock the dependencies and functions used in the authenticate function
 jest.mock("jsonwebtoken", () => ({
   verify: jest.fn(),
 }));
-jest.mock("../controllers/user");
+jest.mock("../server/api/user/user.controller");
 
 describe("authenticate", () => {
   let req: CustomRequest;

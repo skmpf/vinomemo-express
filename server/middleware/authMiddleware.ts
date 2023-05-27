@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { CustomRequest } from "../types/express";
-import { getUserById } from "../controllers/user";
+import { getUserById } from "../api/user/user.controller";
 
 export const authenticate = async (
   req: CustomRequest,

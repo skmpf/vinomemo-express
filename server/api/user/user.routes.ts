@@ -1,14 +1,14 @@
 import express, { Request, Response } from "express";
-import { CustomRequest } from "../types/express";
+import { CustomRequest } from "../../types/express";
 import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { authenticate } from "../middlewares/authMiddleware";
+import { authenticate } from "../../middleware/authMiddleware";
 import {
   loginValidator,
   signupValidator,
   updateUserValidator,
-} from "../utils/validators";
+} from "../../middleware/validators";
 import {
   createUser,
   deleteUser,
@@ -16,7 +16,7 @@ import {
   getUserById,
   getUsers,
   updateUser,
-} from "../controllers/user";
+} from "./user.controller";
 
 const router = express.Router();
 
@@ -30,7 +30,7 @@ router.post("/signup", signupValidator, async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
     const newUser = await createUser(name, email, password);
 
-    const token = jwt.sign({ user: newUser }, process.env.JWT_SECRET);
+    const token = jwt.sign({ user: newUser }, process.env.JWT_SECRET!);
     res.status(201).json({ user: newUser, token });
   } catch (error) {
     console.error("POST /signup", error);
@@ -56,7 +56,7 @@ router.post("/login", loginValidator, async (req: Request, res: Response) => {
       return res.status(401).send("Password is incorrect");
     }
 
-    const token = jwt.sign({ user: existingUser }, process.env.JWT_SECRET);
+    const token = jwt.sign({ user: existingUser }, process.env.JWT_SECRET!);
     return res.status(200).json({ user: existingUser, token });
   } catch (error) {
     console.error("POST /login", error);

@@ -1,8 +1,8 @@
 import express, { Express, Request, Response } from "express";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import UserRoutes from "./routes/user";
-import NoteRoutes from "./routes/note";
+import UserRoutes from "./api/user/user.routes";
+import NoteRoutes from "./api/note/note.routes";
 
 dotenv.config();
 

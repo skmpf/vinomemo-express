@@ -1,4 +1,4 @@
-import Note from "../models/Note";
+import Note from "../../server/api/note/note.model";
 import {
   createNote,
   deleteNote,
@@ -6,10 +6,10 @@ import {
   getNotesByUserId,
   getNotes,
   updateNote,
-} from "../controllers/note";
+} from "../../server/api/note/note.controller";
 import { mockNote } from "./mocks/note";
 
-jest.mock("../models/Note");
+jest.mock("../../server/api/note/note.model");
 
 afterEach(async () => {
   await Note.deleteMany();
