@@ -171,6 +171,34 @@ describe("User Controller", () => {
       expect(bcrypt.hash).not.toHaveBeenCalled();
     });
 
+    it("should not update a user when no changes are provided", async () => {
+      const name = "";
+      const email = "";
+      const password = "";
+
+      (User.findById as jest.Mock).mockResolvedValueOnce({
+        ...mockUser,
+        save: jest.fn(),
+      });
+
+      const updatedUser = await updateUser(
+        mockUser._id.toString(),
+        name,
+        email,
+        password
+      );
+
+      expect(updatedUser).toEqual({
+        ...mockUser,
+        updatedAt: expect.any(Date),
+        save: expect.any(Function),
+      });
+      expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
+      expect(User.findOne).not.toHaveBeenCalled();
+      expect(bcrypt.hash).not.toHaveBeenCalled();
+      expect(updatedUser.save).not.toHaveBeenCalled();
+    });
+
     it("should throw an error when updating a non-existent user", async () => {
       const nonExistentId = new mongoose.Types.ObjectId();
       const name = "John Doe";

@@ -58,26 +58,26 @@ export const getUsers = async () => {
 
 export const updateUser = async (
   userId: string,
-  name: string,
-  email: string,
-  password: string
+  name?: string,
+  email?: string,
+  password?: string
 ) => {
   try {
     const user = await User.findById(userId);
     if (!user) throw new Error("User was not found");
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser && existingUser._id.toString() !== userId) {
-      throw new Error("User with this email already exists");
+    if (email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser && existingUser._id.toString() !== userId) {
+        throw new Error("User with this email already exists");
+      }
+      user.email = email;
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    user.name = name;
-    user.email = email;
-    user.passwordHash = passwordHash;
+    if (name) user.name = name;
+    if (password) user.passwordHash = await bcrypt.hash(password, 10);
     user.updatedAt = new Date();
-    user.save();
+    if (name || email || password) user.save();
 
     return user;
   } catch (e) {
