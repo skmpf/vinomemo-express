@@ -7,9 +7,8 @@
     "build": "tsc",
     "dev": "nodemon --exec ts-node server/index.ts",
     "start": "node dist/index.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test": "export NODE_ENV=TEST && jest --coverage",
+    "test:watch": "export NODE_ENV=TEST && jest --watch"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +32,7 @@
     "@types/jest": "^29.5.1",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.2.1",
+    "@types/supertest": "^2.0.12",
     "babel-jest": "^29.5.0",
     "jest": "^29.5.0",
     "mongodb-memory-server": "^8.12.2",
