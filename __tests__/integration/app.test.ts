@@ -18,13 +18,8 @@ describe("Server", () => {
 
 describe("Database Connection", () => {
   it("should not connect to the MongoDB database in other modes", async () => {
-    // Mock the `connect` method of mongoose
     const connectMock = jest.spyOn(mongoose, "connect");
-
-    // Call the app to trigger the database connection
     app;
-
-    // Expect the `connect` method not to be called
     expect(connectMock).not.toHaveBeenCalled();
   });
 });

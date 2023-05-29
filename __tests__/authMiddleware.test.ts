@@ -4,7 +4,6 @@ import { getUserById } from "../server/api/user/user.controller";
 import { authenticate } from "../server/middleware/authMiddleware";
 import { CustomRequest } from "../server/types/express";
 
-// Mock the dependencies and functions used in the authenticate function
 jest.mock("jsonwebtoken", () => ({
   verify: jest.fn(),
 }));

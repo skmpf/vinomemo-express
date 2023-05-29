@@ -64,6 +64,7 @@ router.post("/login", loginValidator, async (req: Request, res: Response) => {
   }
 });
 
+// TODO: restrict this route to admins only
 router.get(
   "/users",
   authenticate,
