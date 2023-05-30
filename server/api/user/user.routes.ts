@@ -3,7 +3,10 @@ import { CustomRequest } from "../../types/express";
 import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { authenticate } from "../../middleware/authMiddleware";
+import {
+  authenticate,
+  checkPermissionsUser,
+} from "../../middleware/authMiddleware";
 import {
   loginValidator,
   signupValidator,
@@ -67,6 +70,7 @@ router.post("/login", loginValidator, async (req: Request, res: Response) => {
 router.get(
   "/users",
   authenticate,
+  checkPermissionsUser,
   async (req: CustomRequest, res: Response) => {
     try {
       if (!req.user?.isAdmin) {
@@ -85,6 +89,7 @@ router.get(
 router.get(
   "/user/:id",
   authenticate,
+  checkPermissionsUser,
   async (req: CustomRequest, res: Response) => {
     try {
       const user = await getUserById(req.params.id);
@@ -99,6 +104,7 @@ router.get(
 router.put(
   "/user/:id",
   authenticate,
+  checkPermissionsUser,
   updateUserValidator,
   async (req: CustomRequest, res: Response) => {
     try {
@@ -120,6 +126,7 @@ router.put(
 router.delete(
   "/user/:id",
   authenticate,
+  checkPermissionsUser,
   async (req: CustomRequest, res: Response) => {
     try {
       const user = await deleteUser(req.params.id);
