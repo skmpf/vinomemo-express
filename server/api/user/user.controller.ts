@@ -76,7 +76,6 @@ export const updateUser = async (
 
     if (name) user.name = name;
     if (password) user.passwordHash = await bcrypt.hash(password, 10);
-    user.updatedAt = new Date();
     if (name || email || password) user.save();
 
     return user;

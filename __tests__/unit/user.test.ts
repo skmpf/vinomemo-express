@@ -9,7 +9,14 @@ import {
   updateUser,
   deleteUser,
 } from "../../server/api/user/user.controller";
-import { mockUser } from "./mocks/user";
+
+const mockUser = {
+  _id: new mongoose.Types.ObjectId("5f8d0f7b4f4d4b1f3c0b0f7b"),
+  name: "John Doe",
+  email: "john.doe@example.com",
+  password: "password123",
+  passwordHash: "hashedpassword",
+};
 
 jest.mock("bcrypt");
 jest.mock("../../server/api/user/user.model");
@@ -144,7 +151,6 @@ describe("User Controller", () => {
         ...mockUser,
         password,
         passwordHash: "newhashedpassword",
-        updatedAt: expect.any(Date),
         save: expect.any(Function),
       });
       expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
@@ -190,7 +196,6 @@ describe("User Controller", () => {
 
       expect(updatedUser).toEqual({
         ...mockUser,
-        updatedAt: expect.any(Date),
         save: expect.any(Function),
       });
       expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());

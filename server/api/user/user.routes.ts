@@ -32,8 +32,8 @@ router.post("/signup", signupValidator, async (req: Request, res: Response) => {
 
     const token = jwt.sign({ user: newUser }, process.env.JWT_SECRET!);
     res.status(201).json({ user: newUser, token });
-  } catch (error) {
-    console.error("POST /signup", error);
+  } catch (error: unknown) {
+    console.error("POST /signup", (error as Error).message);
     res.status(500).send("Internal Server Error");
   }
 });
@@ -58,22 +58,25 @@ router.post("/login", loginValidator, async (req: Request, res: Response) => {
 
     const token = jwt.sign({ user: existingUser }, process.env.JWT_SECRET!);
     return res.status(200).json({ user: existingUser, token });
-  } catch (error) {
-    console.error("POST /login", error);
+  } catch (error: unknown) {
+    console.error("POST /login", (error as Error).message);
     res.status(500).send("Internal Server Error");
   }
 });
 
-// TODO: restrict this route to admins only
 router.get(
   "/users",
   authenticate,
   async (req: CustomRequest, res: Response) => {
     try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).send("Forbidden access");
+      }
+
       const users = await getUsers();
       res.status(200).json(users);
-    } catch (error) {
-      console.error("GET /users", error);
+    } catch (error: unknown) {
+      console.error("GET /users", (error as Error).message);
       res.status(500).send("Internal Server Error");
     }
   }
@@ -86,8 +89,8 @@ router.get(
     try {
       const user = await getUserById(req.params.id);
       res.status(200).json(user);
-    } catch (error) {
-      console.error(`GET /user/${req.params.id}`, error);
+    } catch (error: unknown) {
+      console.error(`GET /user/${req.params.id}`, (error as Error).message);
       res.status(500).send("Internal Server Error");
     }
   }
@@ -104,12 +107,11 @@ router.put(
         return res.status(400).json({ errors: result.array() });
       }
 
-      const id = req.params.id;
       const { name, email, password } = req.body;
-      const user = await updateUser(id, name, email, password);
+      const user = await updateUser(req.params.id, name, email, password);
       res.status(200).send(user);
-    } catch (error) {
-      console.error(`PUT /user/${req.params.id}`, error);
+    } catch (error: unknown) {
+      console.error(`PUT /user/${req.params.id}`, (error as Error).message);
       res.status(500).send("Internal Server Error");
     }
   }
@@ -122,8 +124,8 @@ router.delete(
     try {
       const user = await deleteUser(req.params.id);
       res.status(200).send(user);
-    } catch (error) {
-      console.error(`DELETE /user/${req.params.id}`, error);
+    } catch (error: unknown) {
+      console.error(`DELETE /user/${req.params.id}`, (error as Error).message);
       res.status(500).send("Internal Server Error");
     }
   }

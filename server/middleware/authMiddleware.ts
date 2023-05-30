@@ -14,7 +14,11 @@ export const authenticate = async (
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
     const id = req.params.id;
-    if (id && id !== decoded.user._id) throw new Error("User not allowed");
+    if (!decoded.user?.isAdmin) {
+      if (id && id !== decoded.user._id.toString()) {
+        return res.status(403).send("Forbidden access");
+      }
+    }
 
     const user = await getUserById(decoded.user._id);
     req.user = user;

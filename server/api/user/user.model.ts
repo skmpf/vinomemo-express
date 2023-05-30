@@ -1,14 +1,21 @@
-import mongoose, { InferSchemaType } from "mongoose";
+import mongoose from "mongoose";
+
+export interface IUser {
+  _id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  isAdmin: boolean;
+}
 
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
+    isAdmin: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-export type IUser = InferSchemaType<typeof userSchema>;
-
-export default mongoose.model("User", userSchema);
+export default mongoose.model<IUser>("User", userSchema);

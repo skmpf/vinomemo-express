@@ -51,12 +51,31 @@ describe("authenticate", () => {
 
     expect(req.header).toHaveBeenCalledWith("Authorization");
     expect(jwt.verify).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.send).toHaveBeenCalledWith("Unauthorized - User not allowed");
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.send).toHaveBeenCalledWith("Forbidden access");
     expect(next).not.toHaveBeenCalled();
   });
 
-  it("should authenticate and call next if a valid token is provided with matching user ID", async () => {
+  it("should throw an error if the id in the token does not exist", async () => {
+    const decodedToken = {
+      user: { _id: "user456" },
+    };
+    req.header = jest.fn().mockReturnValueOnce("Bearer valid_token");
+    (jwt.verify as jest.Mock).mockReturnValueOnce(decodedToken);
+    (getUserById as jest.Mock).mockRejectedValueOnce(
+      new Error("User was not found")
+    );
+
+    await authenticate(req, res, next);
+
+    expect(req.header).toHaveBeenCalledWith("Authorization");
+    expect(jwt.verify).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.send).toHaveBeenCalledWith("Unauthorized - User was not found");
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("should authenticate and call next if a valid token is provided with matching user id", async () => {
     const decodedToken = {
       user: { _id: "user123" },
     };
