@@ -41,7 +41,7 @@ const noteSchema = new mongoose.Schema(
       name: { type: String, required: true },
       country: String,
       region: String,
-      grapes: [String],
+      grapes: { type: [String], default: undefined },
       producer: String,
       vintage: Number,
       alcohol: Number,
@@ -52,7 +52,7 @@ const noteSchema = new mongoose.Schema(
     },
     nose: {
       intensity: Number,
-      aromas: [String],
+      aromas: { type: [String], default: undefined },
     },
     palate: {
       sweetness: Number,
@@ -61,7 +61,7 @@ const noteSchema = new mongoose.Schema(
       alcohol: Number,
       body: Number,
       intensity: Number,
-      flavors: [String],
+      flavors: { type: [String], default: undefined },
       finish: Number,
     },
     conclusion: {
