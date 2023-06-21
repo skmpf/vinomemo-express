@@ -62,7 +62,7 @@ router.post(
         existingUser.passwordHash
       );
       if (!isPasswordCorrect) {
-        return res.status(401).send("Password is incorrect");
+        return res.status(401).send("Invalid credentials");
       }
 
       const token = jwt.sign({ user: existingUser }, process.env.JWT_SECRET!);
