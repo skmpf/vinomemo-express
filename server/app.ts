@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import UserRoutes from "./api/user/user.routes";
 import NoteRoutes from "./api/note/note.routes";
+import { logHandler } from "./middleware/logMiddleware";
+import { errorHandler } from "./middleware/errorMiddleware";
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ if (process.env.NODE_ENV === "dev" || process.env.NODE_ENV === "prod") {
   mongoose.connect(process.env.MONGODB_URI!);
 }
 
+app.use(logHandler);
 app.use(bodyParser.json());
 app.use(UserRoutes);
 app.use(NoteRoutes);
@@ -32,5 +35,6 @@ app.get("/", (req: Request, res: Response) => {
 app.get("*", (req: Request, res: Response) => {
   res.status(404).send("404 Not Found");
 });
+app.use(errorHandler);
 
 export default app;
