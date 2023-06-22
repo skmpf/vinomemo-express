@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
 import request from "supertest";
 import app from "../../server/app";
-import User from "../../server/api/user/user.model";
+import User, { IUser } from "../../server/api/user/user.model";
 import * as userController from "../../server/api/user/user.controller";
+import mongoose from "mongoose";
 
 let userToken: string;
 let userId: string;
@@ -52,7 +53,7 @@ describe("User API", () => {
       expect(response.body).toHaveProperty("errors");
     });
 
-    it.skip("should handle errors and return a 500 status code", async () => {
+    it("should handle errors and return a 500 status code", async () => {
       jest
         .spyOn(userController, "createUser")
         .mockRejectedValueOnce(new Error("Some error"));
@@ -64,7 +65,14 @@ describe("User API", () => {
       });
 
       expect(response.statusCode).toBe(500);
-      expect(response.text).toEqual("Internal Server Error");
+      expect(response.text).toEqual(
+        JSON.stringify({
+          success: false,
+          status: 500,
+          message: "Some error",
+          stack: {},
+        })
+      );
     });
   });
 
@@ -85,7 +93,7 @@ describe("User API", () => {
         .send({ email: mockUser.email, password: "wrongpassword" });
 
       expect(response.statusCode).toBe(401);
-      expect(response.text).toBe("Password is incorrect");
+      expect(response.text).toBe("Invalid credentials");
     });
 
     it("should return 400 if validation fails", async () => {
@@ -138,10 +146,23 @@ describe("User API", () => {
 
     describe("PUT /user/:id", () => {
       it("should update a user", async () => {
+        const updatedUser: IUser & mongoose.Document<any> = {
+          ...mockUser,
+          name: "Updated User",
+          _id: new mongoose.Types.ObjectId(),
+          __v: 0,
+          id: new mongoose.Types.ObjectId().toHexString(),
+          save: jest.fn().mockResolvedValue({}),
+        } as any;
+
         const response = await request(app)
           .put(`/user/${userId}`)
           .set("Authorization", `Bearer ${userToken}`)
           .send({ name: "Updated User" });
+
+        jest
+          .spyOn(userController, "updateUser")
+          .mockResolvedValueOnce(updatedUser);
 
         expect(response.statusCode).toBe(200);
         expect(response.body).toHaveProperty("name", "Updated User");

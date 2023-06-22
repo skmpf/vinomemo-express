@@ -55,12 +55,11 @@ router.post(
       }
 
       const { email, password } = req.body;
-      const existingUser = await getUserByEmail(email);
+      const existingUser = email && (await getUserByEmail(email));
 
-      const isPasswordCorrect = await bcrypt.compare(
-        password,
-        existingUser.passwordHash
-      );
+      const isPasswordCorrect =
+        existingUser &&
+        (await bcrypt.compare(password, existingUser.passwordHash));
       if (!isPasswordCorrect) {
         return res.status(401).send("Invalid credentials");
       }

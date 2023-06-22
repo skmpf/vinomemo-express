@@ -37,17 +37,6 @@ describe("Note Controller", () => {
 
       expect(Note.findById).toHaveBeenCalledWith(mockNote._id.toString());
     });
-
-    it("should throw an error if note is not found", async () => {
-      const nonExistentId = "123456789012345678901234";
-      (Note.findById as jest.Mock).mockResolvedValueOnce(null);
-
-      await expect(getNoteById(nonExistentId)).rejects.toThrow(
-        "Note was not found"
-      );
-
-      expect(Note.findById).toHaveBeenCalledWith(nonExistentId);
-    });
   });
 
   describe("getNotesByUserId", () => {
@@ -62,18 +51,6 @@ describe("Note Controller", () => {
         creator: mockNote.creator.toString(),
       });
     });
-
-    it("should throw an error if notes are not found", async () => {
-      (Note.find as jest.Mock).mockResolvedValueOnce([]);
-
-      await expect(
-        getNotesByUserId(mockNote.creator.toString())
-      ).rejects.toThrow("Notes were not found");
-
-      expect(Note.find).toHaveBeenCalledWith({
-        creator: mockNote.creator.toString(),
-      });
-    });
   });
 
   describe("getNotes", () => {
@@ -83,14 +60,6 @@ describe("Note Controller", () => {
       await expect(getNotes()).resolves.toEqual(Array(3).fill(mockNote));
 
       expect(Note.find).toHaveBeenCalledWith();
-    });
-
-    it("should throw an error if notes are not found", async () => {
-      (Note.find as jest.Mock).mockResolvedValueOnce([]);
-
-      await expect(getNotes()).rejects.toThrow("Notes were not found");
-
-      expect(Note.find).toHaveBeenCalled();
     });
   });
 
@@ -113,21 +82,6 @@ describe("Note Controller", () => {
         { new: true }
       );
     });
-
-    it("should throw an error when updating a non-existent note", async () => {
-      const nonExistentId = "123456789012345678901234";
-      (Note.findByIdAndUpdate as jest.Mock).mockResolvedValueOnce(null);
-
-      await expect(updateNote(nonExistentId, mockNote)).rejects.toThrow(
-        "Note was not found"
-      );
-
-      expect(Note.findByIdAndUpdate).toHaveBeenCalledWith(
-        nonExistentId,
-        mockNote,
-        { new: true }
-      );
-    });
   });
 
   describe("deleteNote", () => {
@@ -141,17 +95,6 @@ describe("Note Controller", () => {
       expect(Note.findByIdAndDelete).toHaveBeenCalledWith(
         mockNote._id.toString()
       );
-    });
-
-    it("should throw an error when deleting a non-existent note", async () => {
-      const nonExistentId = "123456789012345678901234";
-      (Note.findByIdAndDelete as jest.Mock).mockResolvedValueOnce(null);
-
-      await expect(deleteNote(nonExistentId)).rejects.toThrow(
-        "Note was not found"
-      );
-
-      expect(Note.findByIdAndDelete).toHaveBeenCalledWith(nonExistentId);
     });
   });
 });

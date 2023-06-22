@@ -39,7 +39,7 @@ describe("User Controller", () => {
       );
 
       expect(User.findOne).toHaveBeenCalledWith({ email });
-      expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
+      expect(bcrypt.hash).toHaveBeenCalledWith(password, 12);
       expect(User.create).toHaveBeenCalledWith({
         name,
         email,
@@ -52,7 +52,7 @@ describe("User Controller", () => {
       (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser);
 
       await expect(createUser(name, email, password)).rejects.toThrow(
-        "User with this email already exists"
+        "Email is already in use"
       );
 
       expect(User.findOne).toHaveBeenCalledWith({ email });
@@ -69,16 +69,6 @@ describe("User Controller", () => {
 
       expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
     });
-
-    it("should throw an error when getting a user by non-existent ID", async () => {
-      const nonExistentId = new mongoose.Types.ObjectId();
-
-      await expect(getUserById(nonExistentId.toString())).rejects.toThrow(
-        "User was not found"
-      );
-
-      expect(User.findById).toHaveBeenCalledWith(nonExistentId.toString());
-    });
   });
 
   describe("getUserByEmail", () => {
@@ -88,16 +78,6 @@ describe("User Controller", () => {
       await expect(getUserByEmail(mockUser.email)).resolves.toEqual(mockUser);
 
       expect(User.findOne).toHaveBeenCalledWith({ email: mockUser.email });
-    });
-
-    it("should throw an error when getting a user by non-existent email", async () => {
-      const nonExistentEmail = "nonexistent@example.com";
-
-      await expect(getUserByEmail(nonExistentEmail)).rejects.toThrow(
-        "User was not found"
-      );
-
-      expect(User.findOne).toHaveBeenCalledWith({ email: nonExistentEmail });
     });
   });
 
@@ -117,25 +97,21 @@ describe("User Controller", () => {
 
       expect(User.find).toHaveBeenCalled();
     });
-
-    it("should throw an error when no users found", async () => {
-      (User.find as jest.Mock).mockResolvedValueOnce([]);
-
-      await expect(getUsers()).rejects.toThrow("Users were not found");
-
-      expect(User.find).toHaveBeenCalled();
-    });
   });
 
   describe("updateUser", () => {
     it("should update a user", async () => {
-      const name = "John Doe";
-      const email = "john.doe@example.com";
-      const password = "password123";
+      const name = "New Name";
+      const email = "new.name@example.com";
+      const password = "newpassword";
 
-      (User.findById as jest.Mock).mockResolvedValueOnce({
-        ...mockUser,
-        save: jest.fn(),
+      const saveSpy = jest.fn().mockResolvedValue(true);
+      (User.findById as jest.Mock).mockImplementation(() => {
+        return {
+          ...mockUser,
+          save: saveSpy,
+          select: jest.fn().mockReturnThis(),
+        };
       });
       (User.findOne as jest.Mock).mockResolvedValueOnce(null);
       (bcrypt.hash as jest.Mock).mockResolvedValueOnce("newhashedpassword");
@@ -149,20 +125,19 @@ describe("User Controller", () => {
 
       expect(updatedUser).toEqual({
         ...mockUser,
-        password,
-        passwordHash: "newhashedpassword",
         save: expect.any(Function),
+        select: expect.any(Function),
       });
       expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
       expect(User.findOne).toHaveBeenCalledWith({ email });
-      expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
-      expect(updatedUser.save).toHaveBeenCalled();
+      expect(bcrypt.hash).toHaveBeenCalledWith(password, 12);
+      expect(saveSpy).toHaveBeenCalled();
     });
 
-    it("should not update a user with an existing email", async () => {
+    it("should throw an error when updating a user with an existing email", async () => {
       const id = new mongoose.Types.ObjectId();
-      const name = "John Doe";
-      const email = "john.doe@example.com";
+      const name = "New Name";
+      const email = "new.name@example.com";
       const password = "password123";
 
       (User.findById as jest.Mock).mockResolvedValueOnce(mockUser);
@@ -170,7 +145,7 @@ describe("User Controller", () => {
 
       await expect(
         updateUser(mockUser._id.toString(), name, email, password)
-      ).rejects.toThrow("User with this email already exists");
+      ).rejects.toThrow("Email is already in use");
 
       expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
       expect(User.findOne).toHaveBeenCalledWith({ email });
@@ -194,28 +169,8 @@ describe("User Controller", () => {
         password
       );
 
-      expect(updatedUser).toEqual({
-        ...mockUser,
-        save: expect.any(Function),
-      });
+      expect(updatedUser).toEqual(null);
       expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
-      expect(User.findOne).not.toHaveBeenCalled();
-      expect(bcrypt.hash).not.toHaveBeenCalled();
-      expect(updatedUser.save).not.toHaveBeenCalled();
-    });
-
-    it("should throw an error when updating a non-existent user", async () => {
-      const nonExistentId = new mongoose.Types.ObjectId();
-      const name = "John Doe";
-      const email = "john.doe@example.com";
-      const password = "password123";
-      (User.findById as jest.Mock).mockResolvedValueOnce(null);
-
-      await expect(
-        updateUser(nonExistentId.toString(), name, email, password)
-      ).rejects.toThrow("User was not found");
-
-      expect(User.findById).toHaveBeenCalledWith(nonExistentId.toString());
       expect(User.findOne).not.toHaveBeenCalled();
       expect(bcrypt.hash).not.toHaveBeenCalled();
     });
@@ -231,19 +186,6 @@ describe("User Controller", () => {
 
       expect(User.findByIdAndDelete).toHaveBeenCalledWith(
         mockUser._id.toString()
-      );
-    });
-
-    it("should throw an error when deleting a non-existent user", async () => {
-      const nonExistentId = new mongoose.Types.ObjectId();
-      (User.findByIdAndDelete as jest.Mock).mockResolvedValueOnce(null);
-
-      await expect(deleteUser(nonExistentId.toString())).rejects.toThrow(
-        "User was not found"
-      );
-
-      expect(User.findByIdAndDelete).toHaveBeenCalledWith(
-        nonExistentId.toString()
       );
     });
   });

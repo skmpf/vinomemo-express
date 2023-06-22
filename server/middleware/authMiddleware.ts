@@ -15,7 +15,7 @@ export const authenticate = async (
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
     const user = await getUserById(decoded.user._id);
-    req.user = user;
+    user && (req.user = user);
     next();
   } catch (e) {
     res.status(401).send(`Unauthorized - ${(e as Error).message}`);
@@ -51,7 +51,9 @@ export const checkPermissionsNote = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { creator } = await getNoteById(req.params.id);
+  const note = await getNoteById(req.params.id);
+  const creator = note?.creator;
+
   if (!req.user?.isAdmin) {
     if (creator && creator.toString() !== req.user?._id.toString()) {
       return res.status(403).send("Forbidden access");

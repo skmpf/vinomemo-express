@@ -1,60 +1,34 @@
 import * as bcrypt from "bcrypt";
 import User from "./user.model";
 
+const SALT_ROUNDS = 12;
+
+const hashPassword = async (password: string) => {
+  return await bcrypt.hash(password, SALT_ROUNDS);
+};
+
 export const createUser = async (
   name: string,
   email: string,
   password: string
 ) => {
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) throw new Error("User with this email already exists");
+  const existingUser = await User.findOne({ email });
+  if (existingUser) throw new Error("Email is already in use");
 
-    const passwordHash = await bcrypt.hash(password, 10);
-    const newUser = await User.create({
-      name,
-      email,
-      passwordHash,
-    });
-
-    return newUser;
-  } catch (e) {
-    throw e;
-  }
+  return await User.create({
+    name,
+    email,
+    passwordHash: await hashPassword(password),
+  });
 };
 
-export const getUserById = async (userId: string) => {
-  try {
-    const user = await User.findById(userId);
-    if (!user) throw new Error("User was not found");
+export const getUserById = async (userId: string) =>
+  await User.findById(userId);
 
-    return user;
-  } catch (e) {
-    throw e;
-  }
-};
+export const getUserByEmail = async (email: string) =>
+  await User.findOne({ email });
 
-export const getUserByEmail = async (email: string) => {
-  try {
-    const user = await User.findOne({ email });
-    if (!user) throw new Error("User was not found");
-
-    return user;
-  } catch (e) {
-    throw e;
-  }
-};
-
-export const getUsers = async () => {
-  try {
-    const users = await User.find();
-    if (users.length === 0) throw new Error("Users were not found");
-
-    return users;
-  } catch (e) {
-    throw e;
-  }
-};
+export const getUsers = async () => await User.find();
 
 export const updateUser = async (
   userId: string,
@@ -62,35 +36,25 @@ export const updateUser = async (
   email?: string,
   password?: string
 ) => {
-  try {
-    const user = await User.findById(userId);
-    if (!user) throw new Error("User was not found");
+  const user = await User.findById(userId);
+  if (!user) throw new Error("Invalid request");
 
-    if (email) {
-      const existingUser = await User.findOne({ email });
-      if (existingUser && existingUser._id.toString() !== userId) {
-        throw new Error("User with this email already exists");
-      }
-      user.email = email;
+  if (email) {
+    const existingUser = await User.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== userId) {
+      throw new Error("Email is already in use");
     }
-
-    if (name) user.name = name;
-    if (password) user.passwordHash = await bcrypt.hash(password, 10);
-    if (name || email || password) user.save();
-
-    return user;
-  } catch (e) {
-    throw e;
+    user.email = email;
   }
+
+  if (name) user.name = name;
+  if (password) user.passwordHash = await hashPassword(password);
+  if (name || email || password) {
+    await user.save();
+    return await User.findById(userId).select("-passwordHash");
+  }
+  return null;
 };
 
-export const deleteUser = async (userId: string) => {
-  try {
-    const user = await User.findByIdAndDelete(userId);
-    if (!user) throw new Error("User was not found");
-
-    return user;
-  } catch (e) {
-    throw e;
-  }
-};
+export const deleteUser = async (userId: string) =>
+  await User.findByIdAndDelete(userId);
