@@ -22,7 +22,7 @@ export const errorHandler = (
     success: false,
     status: errorStatus,
     message: errorMessage,
-    stack: process.env.NODE_ENV === "dev" ? error.stack : {},
+    stack: process.env.NODE_ENV === "development" ? error.stack : {},
   });
   next();
 };

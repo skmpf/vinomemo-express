@@ -14,14 +14,17 @@ const app: Express = express();
 app.use(
   cors({
     origin:
-      process.env.NODE_ENV === "dev"
+      process.env.NODE_ENV === "development"
         ? "http://localhost:3000"
         : process.env.VINOMEMO_APP_URL,
     credentials: true,
   })
 );
 
-if (process.env.NODE_ENV === "dev" || process.env.NODE_ENV === "prod") {
+if (
+  process.env.NODE_ENV === "development" ||
+  process.env.NODE_ENV === "production"
+) {
   mongoose.connect(process.env.MONGODB_URI!);
 }
 
