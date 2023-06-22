@@ -1,6 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
 import { CustomRequest } from "../../types/express";
-import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {
@@ -8,10 +7,11 @@ import {
   checkPermissionsUser,
 } from "../../middleware/authMiddleware";
 import {
-  loginValidator,
-  signupValidator,
-  updateUserValidator,
-} from "../../middleware/validators";
+  loginSchema,
+  signupSchema,
+  updateUserSchema,
+} from "../../middleware/validationSchema";
+import { validateSchema } from "../../middleware/validationMiddleware";
 import {
   createUser,
   deleteUser,
@@ -25,14 +25,9 @@ const router = express.Router();
 
 router.post(
   "/signup",
-  signupValidator,
+  validateSchema(signupSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = validationResult(req);
-      if (!result.isEmpty()) {
-        return res.status(400).json({ errors: result.array() });
-      }
-
       const { name, email, password } = req.body;
       const newUser = await createUser(name, email, password);
 
@@ -46,14 +41,9 @@ router.post(
 
 router.post(
   "/login",
-  loginValidator,
+  validateSchema(loginSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = validationResult(req);
-      if (!result.isEmpty()) {
-        return res.status(400).json({ errors: result.array() });
-      }
-
       const { email, password } = req.body;
       const existingUser = email && (await getUserByEmail(email));
 
@@ -108,14 +98,9 @@ router.put(
   "/user/:id",
   authenticate,
   checkPermissionsUser,
-  updateUserValidator,
+  validateSchema(updateUserSchema),
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
-      const result = validationResult(req);
-      if (!result.isEmpty()) {
-        return res.status(400).json({ errors: result.array() });
-      }
-
       const { name, email, password } = req.body;
       const user = await updateUser(req.params.id, name, email, password);
       res.status(200).send(user);
