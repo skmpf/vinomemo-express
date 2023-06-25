@@ -23,13 +23,13 @@ export const createUser = async (
 };
 
 export const getUserById = async (userId: string) =>
-  await User.findById(userId);
+  await User.findById(userId).select("-passwordHash");
 
 export const getUserByEmail = async (email: string) =>
   await User.findOne({ email });
 
 export const getUsers = async () =>
-  await User.find().select("-passwordHash -__v").exec();
+  await User.find().select("-passwordHash").exec();
 
 export const updateUser = async (
   userId: string,
@@ -58,4 +58,4 @@ export const updateUser = async (
 };
 
 export const deleteUser = async (userId: string) =>
-  await User.findByIdAndDelete(userId);
+  await User.findByIdAndDelete(userId).select("-passwordHash");

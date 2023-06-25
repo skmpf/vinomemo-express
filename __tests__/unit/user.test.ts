@@ -61,11 +61,17 @@ describe("User Controller", () => {
 
   describe("getUserById", () => {
     it("should get a user by ID", async () => {
-      (User.findById as jest.Mock).mockResolvedValueOnce(mockUser);
+      (User.findById as jest.Mock).mockImplementation(() => {
+        return {
+          ...mockUser,
+          select: jest.fn().mockReturnThis(),
+        };
+      });
 
-      await expect(getUserById(mockUser._id.toString())).resolves.toEqual(
-        mockUser
-      );
+      await expect(getUserById(mockUser._id.toString())).resolves.toEqual({
+        ...mockUser,
+        select: expect.any(Function),
+      });
 
       expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
     });
@@ -206,11 +212,17 @@ describe("User Controller", () => {
 
   describe("deleteUser", () => {
     it("should delete a user", async () => {
-      (User.findByIdAndDelete as jest.Mock).mockResolvedValueOnce(mockUser);
+      (User.findByIdAndDelete as jest.Mock).mockImplementation(() => {
+        return {
+          ...mockUser,
+          select: jest.fn().mockReturnThis(),
+        };
+      });
 
-      await expect(deleteUser(mockUser._id.toString())).resolves.toEqual(
-        mockUser
-      );
+      await expect(deleteUser(mockUser._id.toString())).resolves.toEqual({
+        ...mockUser,
+        select: expect.any(Function),
+      });
 
       expect(User.findByIdAndDelete).toHaveBeenCalledWith(
         mockUser._id.toString()
