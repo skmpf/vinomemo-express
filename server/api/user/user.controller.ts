@@ -28,7 +28,8 @@ export const getUserById = async (userId: string) =>
 export const getUserByEmail = async (email: string) =>
   await User.findOne({ email });
 
-export const getUsers = async () => await User.find();
+export const getUsers = async () =>
+  await User.find().select("-passwordHash -__v").exec();
 
 export const updateUser = async (
   userId: string,

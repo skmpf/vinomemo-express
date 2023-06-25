@@ -11,7 +11,7 @@ export const authenticate = async (
 ) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
-    if (!token) throw new Error("No token provided");
+    if (!token) throw new Error("Unauthorized - no jwt");
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
     const user = await getUserById(decoded.user._id);
@@ -28,7 +28,7 @@ export const adminOnly = (
   next: NextFunction
 ) => {
   if (!req.user?.isAdmin) {
-    return res.status(403).send("Forbidden access");
+    return res.status(403).send("Unauthorized");
   }
   next();
 };
@@ -40,7 +40,7 @@ export const checkPermissionsUser = (
 ) => {
   if (!req.user?.isAdmin) {
     if (req.params.id && req.params.id !== req.user?._id.toString()) {
-      return res.status(403).send("Forbidden access");
+      return res.status(403).send("Unauthorized");
     }
   }
   next();
@@ -56,7 +56,7 @@ export const checkPermissionsNote = async (
 
   if (!req.user?.isAdmin) {
     if (creator && creator.toString() !== req.user?._id.toString()) {
-      return res.status(403).send("Forbidden access");
+      return res.status(403).send("Unauthorized");
     }
   }
   next();

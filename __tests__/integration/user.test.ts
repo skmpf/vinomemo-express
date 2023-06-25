@@ -128,7 +128,7 @@ describe("User API", () => {
           .set("Authorization", `Bearer ${userToken}`);
 
         expect(response.statusCode).toBe(403);
-        expect(response.text).toBe("Forbidden access");
+        expect(response.text).toBe("Unauthorized");
       });
     });
 

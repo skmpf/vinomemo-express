@@ -91,7 +91,13 @@ describe("User Controller", () => {
           passwordHash: "hashedpassword",
         },
       ];
-      (User.find as jest.Mock).mockResolvedValueOnce(users);
+
+      (User.find as jest.Mock).mockImplementation(() => {
+        return {
+          select: jest.fn().mockReturnThis(),
+          exec: jest.fn().mockResolvedValueOnce(users),
+        };
+      });
 
       await expect(getUsers()).resolves.toEqual(users);
 
@@ -134,6 +140,24 @@ describe("User Controller", () => {
       expect(saveSpy).toHaveBeenCalled();
     });
 
+    it("should throw an error when updating a user with a non existent ID", async () => {
+      const name = "New Name";
+      const email = "new.name@example.com";
+      const password = "password123";
+
+      (User.findById as jest.Mock).mockResolvedValueOnce(null);
+      const saveSpy = jest.fn().mockResolvedValue(false);
+
+      await expect(
+        updateUser("wrongid", name, email, password)
+      ).rejects.toThrow("Invalid request");
+
+      expect(User.findById).toHaveBeenCalledWith("wrongid");
+      expect(User.findOne).not.toHaveBeenCalled();
+      expect(bcrypt.hash).not.toHaveBeenCalled();
+      expect(saveSpy).not.toHaveBeenCalled();
+    });
+
     it("should throw an error when updating a user with an existing email", async () => {
       const id = new mongoose.Types.ObjectId();
       const name = "New Name";
@@ -142,6 +166,7 @@ describe("User Controller", () => {
 
       (User.findById as jest.Mock).mockResolvedValueOnce(mockUser);
       (User.findOne as jest.Mock).mockResolvedValueOnce({ _id: id });
+      const saveSpy = jest.fn().mockResolvedValue(false);
 
       await expect(
         updateUser(mockUser._id.toString(), name, email, password)
@@ -150,6 +175,7 @@ describe("User Controller", () => {
       expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
       expect(User.findOne).toHaveBeenCalledWith({ email });
       expect(bcrypt.hash).not.toHaveBeenCalled();
+      expect(saveSpy).not.toHaveBeenCalled();
     });
 
     it("should not update a user when no changes are provided", async () => {
@@ -161,6 +187,7 @@ describe("User Controller", () => {
         ...mockUser,
         save: jest.fn(),
       });
+      const saveSpy = jest.fn().mockResolvedValue(false);
 
       const updatedUser = await updateUser(
         mockUser._id.toString(),
@@ -173,6 +200,7 @@ describe("User Controller", () => {
       expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
       expect(User.findOne).not.toHaveBeenCalled();
       expect(bcrypt.hash).not.toHaveBeenCalled();
+      expect(saveSpy).not.toHaveBeenCalled();
     });
   });
 

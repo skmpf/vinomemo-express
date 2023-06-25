@@ -44,7 +44,9 @@ describe("Auth middlewares", () => {
 
       expect(req.header).toHaveBeenCalledWith("Authorization");
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.send).toHaveBeenCalledWith("Unauthorized - No token provided");
+      expect(res.send).toHaveBeenCalledWith(
+        "Unauthorized - Unauthorized - no jwt"
+      );
       expect(next).not.toHaveBeenCalled();
     });
 
@@ -81,7 +83,7 @@ describe("Auth middlewares", () => {
       adminOnly(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.send).toHaveBeenCalledWith("Forbidden access");
+      expect(res.send).toHaveBeenCalledWith("Unauthorized");
       expect(next).not.toHaveBeenCalled();
     });
 
@@ -116,7 +118,7 @@ describe("Auth middlewares", () => {
       checkPermissionsUser(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.send).toHaveBeenCalledWith("Forbidden access");
+      expect(res.send).toHaveBeenCalledWith("Unauthorized");
       expect(next).not.toHaveBeenCalled();
     });
 
@@ -154,7 +156,7 @@ describe("Auth middlewares", () => {
       await checkPermissionsNote(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.send).toHaveBeenCalledWith("Forbidden access");
+      expect(res.send).toHaveBeenCalledWith("Unauthorized");
       expect(next).not.toHaveBeenCalled();
     });
 
