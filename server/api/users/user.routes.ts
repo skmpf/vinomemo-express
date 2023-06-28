@@ -64,13 +64,13 @@ router.post(
         existingUser &&
         (await bcrypt.compare(password, existingUser.passwordHash));
       if (!isPasswordCorrect) {
-        return res.status(401).send("Invalid credentials");
+        res.status(401).send("Invalid credentials");
       }
 
       const token = jwt.sign({ user: userData }, process.env.JWT_SECRET!, {
         expiresIn: "7d",
       });
-      return res.status(200).json({ token });
+      res.status(200).json({ token });
     } catch (error: unknown) {
       next(error);
     }
