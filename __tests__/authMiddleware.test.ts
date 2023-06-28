@@ -2,8 +2,8 @@ import { NextFunction, Response } from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { CustomRequest } from "../server/types/express";
-import { getUserById } from "../server/api/user/user.controller";
-import { getNoteById } from "../server/api/note/note.controller";
+import { getUserById } from "../server/api/users/user.controller";
+import { getNoteById } from "../server/api/notes/note.controller";
 import {
   adminOnly,
   authenticate,
@@ -14,8 +14,8 @@ import {
 jest.mock("jsonwebtoken", () => ({
   verify: jest.fn(),
 }));
-jest.mock("../server/api/user/user.controller");
-jest.mock("../server/api/note/note.controller");
+jest.mock("../server/api/users/user.controller");
+jest.mock("../server/api/notes/note.controller");
 
 let req: CustomRequest;
 let res: Response;

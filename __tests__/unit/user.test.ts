@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import * as bcrypt from "bcrypt";
-import User from "../../server/api/user/user.model";
+import User from "../../server/api/users/user.model";
 import {
   createUser,
   getUserById,
@@ -8,7 +8,7 @@ import {
   getUsers,
   updateUser,
   deleteUser,
-} from "../../server/api/user/user.controller";
+} from "../../server/api/users/user.controller";
 
 const mockUser = {
   _id: new mongoose.Types.ObjectId("5f8d0f7b4f4d4b1f3c0b0f7b"),
@@ -19,7 +19,7 @@ const mockUser = {
 };
 
 jest.mock("bcrypt");
-jest.mock("../../server/api/user/user.model");
+jest.mock("../../server/api/users/user.model");
 
 afterEach(async () => {
   await User.deleteMany();

@@ -3,8 +3,8 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import UserRoutes from "./api/user/user.routes";
-import NoteRoutes from "./api/note/note.routes";
+import UserRoutes from "./api/users/user.routes";
+import NoteRoutes from "./api/notes/note.routes";
 import { logHandler } from "./middleware/logMiddleware";
 import { errorHandler } from "./middleware/errorMiddleware";
 

@@ -40,7 +40,7 @@ router.post(
       const token = jwt.sign({ user: userData }, process.env.JWT_SECRET!, {
         expiresIn: "7d",
       });
-      res.status(201).json({ user: userData, token });
+      res.status(201).json({ token });
     } catch (error: unknown) {
       next(error);
     }
@@ -70,7 +70,7 @@ router.post(
       const token = jwt.sign({ user: userData }, process.env.JWT_SECRET!, {
         expiresIn: "7d",
       });
-      return res.status(200).json({ user: userData, token });
+      return res.status(200).json({ token });
     } catch (error: unknown) {
       next(error);
     }
@@ -92,7 +92,7 @@ router.get(
 );
 
 router.get(
-  "/user/:id",
+  "/users/:id",
   authenticate,
   checkPermissionsUser,
   async (req: CustomRequest, res: Response, next: NextFunction) => {
@@ -106,7 +106,7 @@ router.get(
 );
 
 router.put(
-  "/user/:id",
+  "/users/:id",
   authenticate,
   checkPermissionsUser,
   validateSchema(updateUserSchema),
@@ -122,7 +122,7 @@ router.put(
 );
 
 router.delete(
-  "/user/:id",
+  "/users/:id",
   authenticate,
   checkPermissionsUser,
   async (req: CustomRequest, res: Response, next: NextFunction) => {

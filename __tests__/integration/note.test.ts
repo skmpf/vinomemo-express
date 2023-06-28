@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import request from "supertest";
 import app from "../../server/app";
-import Note from "../../server/api/note/note.model";
-import User from "../../server/api/user/user.model";
-import * as userController from "../../server/api/user/user.controller";
-import * as noteController from "../../server/api/note/note.controller";
+import Note from "../../server/api/notes/note.model";
+import User from "../../server/api/users/user.model";
+import * as userController from "../../server/api/users/user.controller";
+import * as noteController from "../../server/api/notes/note.controller";
 
 let userId: string;
 let noteId: string;
@@ -44,7 +44,7 @@ afterEach(async () => {
 describe("Note API", () => {
   it("should create a new note", async () => {
     const response = await request(app)
-      .post("/note")
+      .post("/notes")
       .set("Authorization", `Bearer ${userToken}`)
       .send({ ...mockNote, information: { name: "Test Note creation" } });
 
@@ -79,7 +79,7 @@ describe("Note API", () => {
 
   it("should get notes by user ID", async () => {
     const response = await request(app)
-      .get(`/user/${userId}/notes`)
+      .get(`/users/${userId}/notes`)
       .set("Authorization", `Bearer ${userToken}`);
 
     expect(response.statusCode).toBe(200);
@@ -92,7 +92,7 @@ describe("Note API", () => {
 
   it("should get a note by ID", async () => {
     const response = await request(app)
-      .get(`/note/${noteId}`)
+      .get(`/notes/${noteId}`)
       .set("Authorization", `Bearer ${userToken}`);
 
     expect(response.statusCode).toBe(200);
@@ -103,7 +103,7 @@ describe("Note API", () => {
 
   it("should update a note", async () => {
     const response = await request(app)
-      .put(`/note/${noteId}`)
+      .put(`/notes/${noteId}`)
       .set("Authorization", `Bearer ${userToken}`)
       .send({
         information: {
@@ -119,7 +119,7 @@ describe("Note API", () => {
 
   it("should delete a note", async () => {
     const response = await request(app)
-      .delete(`/note/${noteId}`)
+      .delete(`/notes/${noteId}`)
       .set("Authorization", `Bearer ${userToken}`);
 
     expect(response.statusCode).toBe(200);

@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import request from "supertest";
 import app from "../../server/app";
-import User, { IUser } from "../../server/api/user/user.model";
-import * as userController from "../../server/api/user/user.controller";
+import User, { IUser } from "../../server/api/users/user.model";
+import * as userController from "../../server/api/users/user.controller";
 import mongoose from "mongoose";
 
 let userToken: string;
@@ -40,7 +40,6 @@ describe("User API", () => {
       });
 
       expect(response.statusCode).toBe(201);
-      expect(response.body).toHaveProperty("user");
       expect(response.body).toHaveProperty("token");
     });
 
@@ -83,7 +82,6 @@ describe("User API", () => {
         .send({ email: mockUser.email, password: mockUser.password });
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toHaveProperty("user");
       expect(response.body).toHaveProperty("token");
     });
 
@@ -132,10 +130,10 @@ describe("User API", () => {
       });
     });
 
-    describe("GET /user/:id", () => {
+    describe("GET /users/:id", () => {
       it("should get a user by ID", async () => {
         const response = await request(app)
-          .get(`/user/${userId}`)
+          .get(`/users/${userId}`)
           .set("Authorization", `Bearer ${userToken}`);
 
         expect(response.statusCode).toBe(200);
@@ -144,7 +142,7 @@ describe("User API", () => {
       });
     });
 
-    describe("PUT /user/:id", () => {
+    describe("PUT /users/:id", () => {
       it("should update a user", async () => {
         const updatedUser: IUser & mongoose.Document<any> = {
           ...mockUser,
@@ -156,7 +154,7 @@ describe("User API", () => {
         } as any;
 
         const response = await request(app)
-          .put(`/user/${userId}`)
+          .put(`/users/${userId}`)
           .set("Authorization", `Bearer ${userToken}`)
           .send({ name: "Updated User" });
 
@@ -170,7 +168,7 @@ describe("User API", () => {
 
       it("should return 400 if validation fails", async () => {
         const response = await request(app)
-          .put(`/user/${userId}`)
+          .put(`/users/${userId}`)
           .set("Authorization", `Bearer ${userToken}`)
           .send({ name: "", email: "", password: "pass" });
 
@@ -179,10 +177,10 @@ describe("User API", () => {
       });
     });
 
-    describe("DELETE /user/:id", () => {
+    describe("DELETE /users/:id", () => {
       it("should delete a user", async () => {
         const response = await request(app)
-          .delete(`/user/${userId}`)
+          .delete(`/users/${userId}`)
           .set("Authorization", `Bearer ${userToken}`);
 
         expect(response.statusCode).toBe(200);

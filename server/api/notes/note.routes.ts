@@ -16,7 +16,7 @@ import {
 const router = express.Router();
 
 router.post(
-  "/note",
+  "/notes",
   authenticate,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -43,7 +43,7 @@ router.get(
 );
 
 router.get(
-  "/user/:id/notes",
+  "/users/:id/notes",
   authenticate,
   checkPermissionsUser,
   async (req: Request, res: Response, next: NextFunction) => {
@@ -57,7 +57,7 @@ router.get(
 );
 
 router.get(
-  "/note/:id",
+  "/notes/:id",
   authenticate,
   checkPermissionsNote,
   async (req: Request, res: Response, next: NextFunction) => {
@@ -71,7 +71,7 @@ router.get(
 );
 
 router.put(
-  "/note/:id",
+  "/notes/:id",
   authenticate,
   checkPermissionsNote,
   async (req: Request, res: Response, next: NextFunction) => {
@@ -85,7 +85,7 @@ router.put(
 );
 
 router.delete(
-  "/note/:id",
+  "/notes/:id",
   authenticate,
   checkPermissionsNote,
   async (req: Request, res: Response, next: NextFunction) => {
