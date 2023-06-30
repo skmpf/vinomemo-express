@@ -78,6 +78,18 @@ router.post(
 );
 
 router.get(
+  "/users/me",
+  authenticate,
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    try {
+      res.status(200).json(req.user);
+    } catch (error: unknown) {
+      next(error);
+    }
+  }
+);
+
+router.get(
   "/users",
   authenticate,
   adminOnly,

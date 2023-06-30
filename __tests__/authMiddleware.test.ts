@@ -40,9 +40,11 @@ afterEach(() => {
 describe("Auth middlewares", () => {
   describe("authenticate", () => {
     it("should throw an error if no token is provided", async () => {
+      req.header = jest.fn().mockReturnValue(null);
+
       await authenticate(req, res, next);
 
-      expect(req.header).toHaveBeenCalledWith("Authorization");
+      expect(req.header).toHaveBeenCalledWith("authorization");
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.send).toHaveBeenCalledWith(
         "Unauthorized - Unauthorized - no jwt"
@@ -60,7 +62,7 @@ describe("Auth middlewares", () => {
 
       await authenticate(req, res, next);
 
-      expect(req.header).toHaveBeenCalledWith("Authorization");
+      expect(req.header).toHaveBeenCalledWith("authorization");
       expect(jwt.verify).toHaveBeenCalled();
       expect(getUserById).toHaveBeenCalledWith("user12345678");
       expect(req.user).toEqual({ _id: "user12345678" });
@@ -113,7 +115,7 @@ describe("Auth middlewares", () => {
         passwordHash: "password_hash",
         isAdmin: false,
       };
-      req.params.id = "user456";
+      req.params.id = "user87654321";
 
       checkPermissionsUser(req, res, next);
 
@@ -150,7 +152,7 @@ describe("Auth middlewares", () => {
       };
       req.params.id = "note123";
       (getNoteById as jest.Mock).mockResolvedValueOnce({
-        creator: new mongoose.Types.ObjectId("user12345678"),
+        creator: new mongoose.Types.ObjectId("user87654321"),
       });
 
       await checkPermissionsNote(req, res, next);

@@ -10,7 +10,7 @@ export const authenticate = async (
   next: NextFunction
 ) => {
   try {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.header("authorization")?.replace("Bearer ", "");
     if (!token) throw new Error("Unauthorized - no jwt");
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
