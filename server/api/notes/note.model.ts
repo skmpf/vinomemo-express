@@ -5,32 +5,33 @@ export interface INote {
     name: string;
     country?: string;
     region?: string;
-    grapes?: string[];
+    grapes?: string;
     producer?: string;
     vintage?: number;
     alcohol?: number;
   };
   appearance?: {
-    intensity?: number;
+    intensity?: string;
     color?: string;
+    variant?: string;
   };
   nose?: {
-    intensity?: number;
-    aromas?: string[];
+    intensity?: string;
+    aromas?: string;
   };
   palate?: {
-    sweetness?: number;
-    acidity?: number;
-    tannin?: number;
-    alcohol?: number;
-    body?: number;
-    intensity?: number;
-    flavors?: string[];
-    finish?: number;
+    sweetness?: string;
+    acidity?: string;
+    tannin?: string;
+    alcohol?: string;
+    body?: string;
+    intensity?: string;
+    flavors?: string;
+    finish?: string;
   };
-  conclusion?: {
+  conclusions?: {
+    quality?: string;
     comments?: string;
-    rating?: number;
   };
   creator: mongoose.Types.ObjectId;
 }
@@ -41,32 +42,33 @@ const noteSchema = new mongoose.Schema(
       name: { type: String, required: true },
       country: String,
       region: String,
-      grapes: { type: [String], default: undefined },
+      grapes: String,
       producer: String,
       vintage: Number,
       alcohol: Number,
     },
     appearance: {
-      intensity: Number,
+      intensity: String,
       color: String,
+      variant: String,
     },
     nose: {
-      intensity: Number,
-      aromas: { type: [String], default: undefined },
+      intensity: String,
+      aromas: String,
     },
     palate: {
-      sweetness: Number,
-      acidity: Number,
-      tannin: Number,
-      alcohol: Number,
-      body: Number,
-      intensity: Number,
-      flavors: { type: [String], default: undefined },
-      finish: Number,
+      sweetness: String,
+      acidity: String,
+      tannin: String,
+      alcohol: String,
+      body: String,
+      intensity: String,
+      flavors: String,
+      finish: String,
     },
     conclusion: {
       comments: String,
-      rating: Number,
+      rating: String,
     },
     creator: {
       type: mongoose.Schema.Types.ObjectId,
