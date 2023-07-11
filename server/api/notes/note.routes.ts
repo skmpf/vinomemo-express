@@ -15,15 +15,16 @@ import {
 } from "../../middleware/authMiddleware";
 import { validateSchema } from "../../middleware/validationMiddleware";
 import { noteSchema } from "../../middleware/validationSchema";
+import { CustomRequest } from "../../types/express";
 const router = express.Router();
 
 router.post(
   "/notes",
   authenticate,
   validateSchema(noteSchema),
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
-      const newNote = await createNote(req.body);
+      const newNote = await createNote({ ...req.body, creator: req.user?._id });
       res.status(201).json(newNote);
     } catch (error: unknown) {
       next(error);
