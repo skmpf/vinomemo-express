@@ -13,11 +13,14 @@ import {
   checkPermissionsNote,
   checkPermissionsUser,
 } from "../../middleware/authMiddleware";
+import { validateSchema } from "../../middleware/validationMiddleware";
+import { noteSchema } from "../../middleware/validationSchema";
 const router = express.Router();
 
 router.post(
   "/notes",
   authenticate,
+  validateSchema(noteSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const newNote = await createNote(req.body);
@@ -74,6 +77,7 @@ router.put(
   "/notes/:id",
   authenticate,
   checkPermissionsNote,
+  validateSchema(noteSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const note = await updateNote(req.params.id, req.body);

@@ -31,7 +31,7 @@ export const mockNote = {
     finish: "medium",
   },
   conclusion: {
-    rating: "Accpetable",
+    rating: "acceptable",
     comments: "Test Comments",
   },
   creator: new mongoose.Types.ObjectId("5f8d0f7b4f4d4b1f3c0b0f7b"),
