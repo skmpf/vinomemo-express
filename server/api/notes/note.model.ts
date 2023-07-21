@@ -66,9 +66,9 @@ const noteSchema = new mongoose.Schema(
       flavors: String,
       finish: String,
     },
-    conclusion: {
+    conclusions: {
+      quality: String,
       comments: String,
-      rating: String,
     },
     creator: {
       type: mongoose.Schema.Types.ObjectId,

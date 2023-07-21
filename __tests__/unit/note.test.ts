@@ -17,8 +17,8 @@ afterEach(async () => {
 });
 
 describe("Note Controller", () => {
-  describe("createUser", () => {
-    it("should create a new user", async () => {
+  describe("createNote", () => {
+    it("should create a new note", async () => {
       (Note.create as jest.Mock).mockResolvedValueOnce(mockNote);
 
       await expect(createNote(mockNote)).resolves.toEqual(mockNote);

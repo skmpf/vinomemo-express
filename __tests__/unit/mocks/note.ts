@@ -30,9 +30,9 @@ export const mockNote = {
     flavors: "Test Flavor",
     finish: "medium",
   },
-  conclusion: {
-    rating: "acceptable",
+  conclusions: {
     comments: "Test Comments",
+    quality: "acceptable",
   },
   creator: new mongoose.Types.ObjectId("5f8d0f7b4f4d4b1f3c0b0f7b"),
   createdAt: new Date(),
