@@ -51,13 +51,17 @@ export const checkPermissionsNote = async (
   res: Response,
   next: NextFunction
 ) => {
-  const note = await getNoteById(req.params.id);
-  const creator = note?.creator;
+  try {
+    const note = await getNoteById(req.params.id);
+    const creator = note?.creator;
 
-  if (!req.user?.isAdmin) {
-    if (creator && creator.toString() !== req.user?._id.toString()) {
-      return res.status(403).send("Unauthorized");
+    if (!req.user?.isAdmin) {
+      if (creator && creator.toString() !== req.user?._id.toString()) {
+        return res.status(403).send("Unauthorized");
+      }
     }
+    next();
+  } catch (error: unknown) {
+    next(error);
   }
-  next();
 };

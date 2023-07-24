@@ -54,7 +54,7 @@ describe("Auth middlewares", () => {
 
     it("should authenticate and call next if a valid token is provided", async () => {
       const decodedToken = {
-        user: { _id: "user12345678" },
+        user: { _id: new mongoose.Types.ObjectId("user12345678").toString() },
       };
       req.header = jest.fn().mockReturnValueOnce("Bearer valid_token");
       (jwt.verify as jest.Mock).mockReturnValueOnce(decodedToken);
@@ -64,8 +64,12 @@ describe("Auth middlewares", () => {
 
       expect(req.header).toHaveBeenCalledWith("authorization");
       expect(jwt.verify).toHaveBeenCalled();
-      expect(getUserById).toHaveBeenCalledWith("user12345678");
-      expect(req.user).toEqual({ _id: "user12345678" });
+      expect(getUserById).toHaveBeenCalledWith(
+        new mongoose.Types.ObjectId("user12345678").toString()
+      );
+      expect(req.user).toEqual({
+        _id: new mongoose.Types.ObjectId("user12345678").toString(),
+      });
       expect(next).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
       expect(res.send).not.toHaveBeenCalled();
@@ -75,7 +79,7 @@ describe("Auth middlewares", () => {
   describe("adminOnly", () => {
     it("should throw an error if the user is not an admin", () => {
       req.user = {
-        _id: "user12345678",
+        _id: new mongoose.Types.ObjectId("user12345678").toString(),
         name: "test user",
         email: "test@email.com",
         passwordHash: "password_hash",
@@ -91,7 +95,7 @@ describe("Auth middlewares", () => {
 
     it("should call next if the user is an admin", async () => {
       req.user = {
-        _id: "user12345678",
+        _id: new mongoose.Types.ObjectId("user12345678").toString(),
         name: "test user",
         email: "test@email.com",
         passwordHash: "password_hash",
@@ -109,13 +113,13 @@ describe("Auth middlewares", () => {
   describe("checkPermissionsUser", () => {
     it("should throw an error if the user is not an admin and the id in the token does not match the id in the request params", () => {
       req.user = {
-        _id: "user12345678",
+        _id: new mongoose.Types.ObjectId("user12345678").toString(),
         name: "test user",
         email: "test@email.com",
         passwordHash: "password_hash",
         isAdmin: false,
       };
-      req.params.id = "user87654321";
+      req.params.id = new mongoose.Types.ObjectId("user87654321").toString();
 
       checkPermissionsUser(req, res, next);
 
@@ -124,14 +128,32 @@ describe("Auth middlewares", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("should call next if the user has permission", () => {
+    it("should call next if the user is an admin", () => {
       req.user = {
-        _id: "user12345678",
+        _id: new mongoose.Types.ObjectId("user12345678").toString(),
         name: "test user",
         email: "test@email.com",
         passwordHash: "password_hash",
         isAdmin: true,
       };
+      req.params.id = new mongoose.Types.ObjectId("user87654321").toString();
+
+      checkPermissionsUser(req, res, next);
+
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.send).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalled();
+    });
+
+    it("should call next if the user has permission", () => {
+      req.user = {
+        _id: new mongoose.Types.ObjectId("user12345678").toString(),
+        name: "test user",
+        email: "test@email.com",
+        passwordHash: "password_hash",
+        isAdmin: false,
+      };
+      req.params.id = new mongoose.Types.ObjectId("user12345678").toString();
 
       checkPermissionsUser(req, res, next);
 
@@ -144,7 +166,7 @@ describe("Auth middlewares", () => {
   describe("checkPermissionsNote", () => {
     it("should throw an error if the user is not an admin and the id in the token does not match the id in the request params", async () => {
       req.user = {
-        _id: "user12345678",
+        _id: new mongoose.Types.ObjectId("user12345678").toString(),
         name: "test user",
         email: "test@email.com",
         passwordHash: "password_hash",
@@ -162,13 +184,30 @@ describe("Auth middlewares", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("should call next if the user has permission", async () => {
+    it("should call next if the user is an admin", async () => {
       req.user = {
-        _id: "user12345678",
+        _id: new mongoose.Types.ObjectId("user12345678").toString(),
         name: "test user",
         email: "test@email.com",
         passwordHash: "password_hash",
         isAdmin: true,
+      };
+      req.params.id = "note123";
+
+      await checkPermissionsNote(req, res, next);
+
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.send).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalled();
+    });
+
+    it("should call next if the user has permission", async () => {
+      req.user = {
+        _id: new mongoose.Types.ObjectId("user12345678").toString(),
+        name: "test user",
+        email: "test@email.com",
+        passwordHash: "password_hash",
+        isAdmin: false,
       };
       req.params.id = "note123";
       (getNoteById as jest.Mock).mockResolvedValueOnce({
