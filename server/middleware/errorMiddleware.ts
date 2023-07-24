@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-class ExpressError extends Error {
+export class ExpressError extends Error {
   status: number;
 
   constructor(message: string, status: number) {
@@ -18,7 +18,7 @@ export const errorHandler = (
   console.error(error);
   const errorStatus = error.status || 500;
   const errorMessage = error.message || "Internal Server Error";
-  res.status(errorStatus).json({
+  res.status(errorStatus).send({
     success: false,
     status: errorStatus,
     message: errorMessage,

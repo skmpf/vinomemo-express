@@ -25,7 +25,7 @@ router.post(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       const newNote = await createNote({ ...req.body, creator: req.user?._id });
-      res.status(201).json(newNote);
+      res.status(201).send(newNote);
     } catch (error: unknown) {
       next(error);
     }
@@ -39,7 +39,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const notes = await getNotes();
-      res.status(200).json(notes);
+      res.status(200).send(notes);
     } catch (error: unknown) {
       next(error);
     }
@@ -53,7 +53,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const note = await getNotesByUserId(req.params.id);
-      res.status(200).json(note);
+      res.status(200).send(note);
     } catch (error: unknown) {
       next(error);
     }
@@ -67,7 +67,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const note = await getNoteById(req.params.id);
-      res.status(200).json(note);
+      res.status(200).send(note);
     } catch (error: unknown) {
       next(error);
     }
@@ -82,7 +82,7 @@ router.put(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const note = await updateNote(req.params.id, req.body);
-      res.status(200).json(note);
+      res.status(200).send(note);
     } catch (error: unknown) {
       next(error);
     }
@@ -96,7 +96,7 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const note = await deleteNote(req.params.id);
-      res.status(200).json(note);
+      res.status(200).send(note);
     } catch (error: unknown) {
       next(error);
     }

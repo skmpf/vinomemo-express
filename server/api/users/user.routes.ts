@@ -21,6 +21,7 @@ import {
   getUsers,
   updateUser,
 } from "./user.controller";
+import { ExpressError } from "../../middleware/errorMiddleware";
 
 const router = express.Router();
 
@@ -40,7 +41,7 @@ router.post(
       const token = jwt.sign({ user: userData }, process.env.JWT_SECRET!, {
         expiresIn: "7d",
       });
-      res.status(201).json({ token });
+      res.status(201).send({ token });
     } catch (error: unknown) {
       next(error);
     }
@@ -54,6 +55,8 @@ router.post(
     try {
       const { email, password } = req.body;
       const existingUser = email && (await getUserByEmail(email));
+      if (!existingUser) throw new UnauthorizedError();
+
       const userData = {
         _id: existingUser._id,
         name: existingUser.name,
@@ -63,14 +66,12 @@ router.post(
       const isPasswordCorrect =
         existingUser &&
         (await bcrypt.compare(password, existingUser.passwordHash));
-      if (!isPasswordCorrect) {
-        res.status(401).send("Invalid credentials");
-      }
+      if (!isPasswordCorrect) throw new UnauthorizedError();
 
       const token = jwt.sign({ user: userData }, process.env.JWT_SECRET!, {
         expiresIn: "7d",
       });
-      res.status(200).json({ token });
+      res.status(200).send({ token });
     } catch (error: unknown) {
       next(error);
     }
@@ -82,7 +83,7 @@ router.get(
   authenticate,
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
-      res.status(200).json(req.user);
+      res.status(200).send(req.user);
     } catch (error: unknown) {
       next(error);
     }
@@ -96,7 +97,7 @@ router.get(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       const users = await getUsers();
-      res.status(200).json(users);
+      res.status(200).send(users);
     } catch (error: unknown) {
       next(error);
     }
@@ -110,7 +111,7 @@ router.get(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       const user = await getUserById(req.params.id);
-      res.status(200).json(user);
+      res.status(200).send(user);
     } catch (error: unknown) {
       next(error);
     }
@@ -146,5 +147,11 @@ router.delete(
     }
   }
 );
+
+class UnauthorizedError extends ExpressError {
+  constructor() {
+    super("Unauthorized - Invalid credentials", 401);
+  }
+}
 
 export default router;

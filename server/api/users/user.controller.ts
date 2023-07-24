@@ -1,5 +1,6 @@
 import * as bcrypt from "bcrypt";
 import User from "./user.model";
+import { ExpressError } from "../../middleware/errorMiddleware";
 
 const SALT_ROUNDS = 12;
 
@@ -13,7 +14,7 @@ export const createUser = async (
   password: string
 ) => {
   const existingUser = await User.findOne({ email });
-  if (existingUser) throw new Error("Email is already in use");
+  if (existingUser) throw new UsedEmailError();
 
   return await User.create({
     name,
@@ -38,12 +39,12 @@ export const updateUser = async (
   password?: string
 ) => {
   const user = await User.findById(userId);
-  if (!user) throw new Error("Invalid request");
+  if (!user) throw new ExpressError("Invalid request", 400);
 
   if (email) {
     const existingUser = await User.findOne({ email });
     if (existingUser && existingUser._id.toString() !== userId) {
-      throw new Error("Email is already in use");
+      throw new UsedEmailError();
     }
     user.email = email;
   }
@@ -59,3 +60,9 @@ export const updateUser = async (
 
 export const deleteUser = async (userId: string) =>
   await User.findByIdAndDelete(userId).select("-passwordHash");
+
+class UsedEmailError extends ExpressError {
+  constructor() {
+    super("Email is already used", 406);
+  }
+}

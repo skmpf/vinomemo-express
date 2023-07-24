@@ -85,13 +85,36 @@ describe("User API", () => {
       expect(response.body).toHaveProperty("token");
     });
 
+    it("should return 401 if email is incorrect", async () => {
+      const response = await request(app)
+        .post("/login")
+        .send({ email: "wrongemail@email.com", password: mockUser.password });
+
+      expect(response.statusCode).toBe(401);
+      expect(response.text).toBe(
+        JSON.stringify({
+          success: false,
+          status: 401,
+          message: "Unauthorized - Invalid credentials",
+          stack: {},
+        })
+      );
+    });
+
     it("should return 401 if password is incorrect", async () => {
       const response = await request(app)
         .post("/login")
         .send({ email: mockUser.email, password: "wrongpassword" });
 
       expect(response.statusCode).toBe(401);
-      expect(response.text).toBe("Invalid credentials");
+      expect(response.text).toBe(
+        JSON.stringify({
+          success: false,
+          status: 401,
+          message: "Unauthorized - Invalid credentials",
+          stack: {},
+        })
+      );
     });
 
     it("should return 400 if validation fails", async () => {
@@ -120,13 +143,20 @@ describe("User API", () => {
         expect(response.body).toBeInstanceOf(Array);
       });
 
-      it("should return 403 if requester is not an admin", async () => {
+      it("should return 401 if requester is not an admin", async () => {
         const response = await request(app)
           .get("/users")
           .set("Authorization", `Bearer ${userToken}`);
 
-        expect(response.statusCode).toBe(403);
-        expect(response.text).toBe("Unauthorized");
+        expect(response.statusCode).toBe(401);
+        expect(response.text).toBe(
+          JSON.stringify({
+            success: false,
+            status: 401,
+            message: "Unauthorized",
+            stack: {},
+          })
+        );
       });
     });
 

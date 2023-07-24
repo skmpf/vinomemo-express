@@ -5,11 +5,13 @@ import { CustomRequest } from "../server/types/express";
 import { getUserById } from "../server/api/users/user.controller";
 import { getNoteById } from "../server/api/notes/note.controller";
 import {
+  UnauthorizedError,
   adminOnly,
   authenticate,
   checkPermissionsNote,
   checkPermissionsUser,
 } from "../server/middleware/authMiddleware";
+import { ExpressError } from "../server/middleware/errorMiddleware";
 
 jest.mock("jsonwebtoken", () => ({
   verify: jest.fn(),
@@ -17,6 +19,7 @@ jest.mock("jsonwebtoken", () => ({
 jest.mock("../server/api/users/user.controller");
 jest.mock("../server/api/notes/note.controller");
 
+const error = new UnauthorizedError();
 let req: CustomRequest;
 let res: Response;
 let next: NextFunction;
@@ -44,12 +47,10 @@ describe("Auth middlewares", () => {
 
       await authenticate(req, res, next);
 
+      const jwtError = new ExpressError("Unauthorized - No JWT", 401);
+
       expect(req.header).toHaveBeenCalledWith("authorization");
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.send).toHaveBeenCalledWith(
-        "Unauthorized - Unauthorized - no jwt"
-      );
-      expect(next).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(jwtError);
     });
 
     it("should authenticate and call next if a valid token is provided", async () => {
@@ -70,9 +71,7 @@ describe("Auth middlewares", () => {
       expect(req.user).toEqual({
         _id: new mongoose.Types.ObjectId("user12345678").toString(),
       });
-      expect(next).toHaveBeenCalled();
-      expect(res.status).not.toHaveBeenCalled();
-      expect(res.send).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
     });
   });
 
@@ -88,9 +87,7 @@ describe("Auth middlewares", () => {
 
       adminOnly(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.send).toHaveBeenCalledWith("Unauthorized");
-      expect(next).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(error);
     });
 
     it("should call next if the user is an admin", async () => {
@@ -104,9 +101,7 @@ describe("Auth middlewares", () => {
 
       adminOnly(req, res, next);
 
-      expect(res.status).not.toHaveBeenCalled();
-      expect(res.send).not.toHaveBeenCalled();
-      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
     });
   });
 
@@ -123,9 +118,7 @@ describe("Auth middlewares", () => {
 
       checkPermissionsUser(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.send).toHaveBeenCalledWith("Unauthorized");
-      expect(next).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(error);
     });
 
     it("should call next if the user is an admin", () => {
@@ -140,9 +133,7 @@ describe("Auth middlewares", () => {
 
       checkPermissionsUser(req, res, next);
 
-      expect(res.status).not.toHaveBeenCalled();
-      expect(res.send).not.toHaveBeenCalled();
-      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
     });
 
     it("should call next if the user has permission", () => {
@@ -157,9 +148,7 @@ describe("Auth middlewares", () => {
 
       checkPermissionsUser(req, res, next);
 
-      expect(res.status).not.toHaveBeenCalled();
-      expect(res.send).not.toHaveBeenCalled();
-      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
     });
   });
 
@@ -179,9 +168,7 @@ describe("Auth middlewares", () => {
 
       await checkPermissionsNote(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.send).toHaveBeenCalledWith("Unauthorized");
-      expect(next).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(error);
     });
 
     it("should call next if the user is an admin", async () => {
@@ -196,9 +183,7 @@ describe("Auth middlewares", () => {
 
       await checkPermissionsNote(req, res, next);
 
-      expect(res.status).not.toHaveBeenCalled();
-      expect(res.send).not.toHaveBeenCalled();
-      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
     });
 
     it("should call next if the user has permission", async () => {
@@ -216,9 +201,7 @@ describe("Auth middlewares", () => {
 
       await checkPermissionsNote(req, res, next);
 
-      expect(res.status).not.toHaveBeenCalled();
-      expect(res.send).not.toHaveBeenCalled();
-      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
     });
   });
 });

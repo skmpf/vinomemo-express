@@ -52,7 +52,7 @@ describe("User Controller", () => {
       (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser);
 
       await expect(createUser(name, email, password)).rejects.toThrow(
-        "Email is already in use"
+        "Email is already used"
       );
 
       expect(User.findOne).toHaveBeenCalledWith({ email });
@@ -176,7 +176,7 @@ describe("User Controller", () => {
 
       await expect(
         updateUser(mockUser._id.toString(), name, email, password)
-      ).rejects.toThrow("Email is already in use");
+      ).rejects.toThrow("Email is already used");
 
       expect(User.findById).toHaveBeenCalledWith(mockUser._id.toString());
       expect(User.findOne).toHaveBeenCalledWith({ email });

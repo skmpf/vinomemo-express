@@ -3,6 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { CustomRequest } from "../types/express";
 import { getUserById } from "../api/users/user.controller";
 import { getNoteById } from "../api/notes/note.controller";
+import { ExpressError } from "./errorMiddleware";
 
 export const authenticate = async (
   req: CustomRequest,
@@ -11,14 +12,15 @@ export const authenticate = async (
 ) => {
   try {
     const token = req.header("authorization")?.replace("Bearer ", "");
-    if (!token) throw new Error("Unauthorized - no jwt");
+    if (!token) throw new ExpressError("Unauthorized - No JWT", 401);
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
     const user = await getUserById(decoded.user._id);
     user && (req.user = user);
     next();
-  } catch (e) {
-    res.status(401).send(`Unauthorized - ${(e as Error).message}`);
+  } catch (error: unknown) {
+    const expressError = new ExpressError(`${(error as Error).message}`, 401);
+    next(expressError);
   }
 };
 
@@ -27,10 +29,12 @@ export const adminOnly = (
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.user?.isAdmin) {
-    return res.status(403).send("Unauthorized");
+  try {
+    if (!req.user?.isAdmin) throw new UnauthorizedError();
+    next();
+  } catch (error: unknown) {
+    next(error);
   }
-  next();
 };
 
 export const checkPermissionsUser = (
@@ -38,12 +42,16 @@ export const checkPermissionsUser = (
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.user?.isAdmin) {
-    if (req.params.id && req.params.id !== req.user?._id.toString()) {
-      return res.status(403).send("Unauthorized");
+  try {
+    if (!req.user?.isAdmin) {
+      if (req.params.id && req.params.id !== req.user?._id.toString()) {
+        throw new UnauthorizedError();
+      }
     }
+    next();
+  } catch (error: unknown) {
+    next(error);
   }
-  next();
 };
 
 export const checkPermissionsNote = async (
@@ -57,7 +65,7 @@ export const checkPermissionsNote = async (
 
     if (!req.user?.isAdmin) {
       if (creator && creator.toString() !== req.user?._id.toString()) {
-        return res.status(403).send("Unauthorized");
+        throw new UnauthorizedError();
       }
     }
     next();
@@ -65,3 +73,9 @@ export const checkPermissionsNote = async (
     next(error);
   }
 };
+
+export class UnauthorizedError extends ExpressError {
+  constructor() {
+    super("Unauthorized", 401);
+  }
+}
