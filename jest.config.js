@@ -1,8 +1,10 @@
+const path = require("path");
+
 module.exports = {
   testEnvironment: "node",
   testMatch: ["**/__tests__/**/*.test.ts"],
   preset: "ts-jest",
-  globalSetup: "<rootDir>/__tests__/db/globalSetup.ts",
-  globalTeardown: "<rootDir>/__tests__/db/globalTeardown.ts",
-  setupFilesAfterEnv: ["<rootDir>/__tests__/db/setupFile.ts"],
+  globalSetup: path.resolve(__dirname, "./__tests__/db/globalSetup.ts"),
+  globalTeardown: path.resolve(__dirname, "./__tests__/db/globalTeardown.ts"),
+  setupFilesAfterEnv: [path.resolve(__dirname, "./__tests__/db/setupFile.ts")],
 };
