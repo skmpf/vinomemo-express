@@ -38,7 +38,7 @@ export const noteSchema = Yup.object().shape({
       .min(1700, "Vintage does not exist")
       .max(new Date().getFullYear(), "Vintage must be in the past")
       .notRequired(),
-    alcohol: Yup.number().positive().min(0).max(22).notRequired(),
+    alcohol: Yup.string().min(3).max(4).notRequired(),
   }),
   appearance: Yup.object().shape({
     intensity: Yup.string()

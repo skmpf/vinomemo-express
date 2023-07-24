@@ -8,7 +8,7 @@ export interface INote {
     grapes?: string;
     producer?: string;
     vintage?: number;
-    alcohol?: number;
+    alcohol?: string;
   };
   appearance?: {
     intensity?: string;
@@ -45,7 +45,7 @@ const noteSchema = new mongoose.Schema(
       grapes: String,
       producer: String,
       vintage: Number,
-      alcohol: Number,
+      alcohol: String,
     },
     appearance: {
       intensity: String,
