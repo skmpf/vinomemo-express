@@ -214,6 +214,67 @@ describe("User API", () => {
       });
     });
 
+    describe("GET /users/search", () => {
+      beforeEach(() => {
+        jest.spyOn(userController, "getUserById").mockReturnValueOnce({
+          ...mockUser,
+          isAdmin: true,
+        } as any);
+      });
+
+      it("should get a user by ID", async () => {
+        const response = await request(app)
+          .get(`/users/search?id=${userId}`)
+          .set("Authorization", `Bearer ${userToken}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toHaveProperty("name");
+        expect(response.body).toHaveProperty("email");
+      });
+
+      it("should get a user by name", async () => {
+        jest.spyOn(userController, "getUserByName").mockResolvedValueOnce({
+          ...mockUser,
+          _id: userId,
+        } as any);
+
+        const response = await request(app)
+          .get(`/users/search?name=${mockUser.name}`)
+          .set("Authorization", `Bearer ${userToken}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toHaveProperty("name");
+        expect(response.body).toHaveProperty("email");
+      });
+
+      it("should get a user by email", async () => {
+        jest.spyOn(userController, "getUserByEmail").mockResolvedValueOnce({
+          ...mockUser,
+          _id: userId,
+        } as any);
+
+        const response = await request(app)
+          .get(`/users/search?email=${mockUser.email}`)
+          .set("Authorization", `Bearer ${userToken}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toHaveProperty("name");
+        expect(response.body).toHaveProperty("email");
+      });
+
+      it("should return 400 if no valid search parameter is provided", async () => {
+        const response = await request(app)
+          .get(`/users/search`)
+          .set("Authorization", `Bearer ${userToken}`);
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toHaveProperty(
+          "message",
+          "Invalid search parameters"
+        );
+      });
+    });
+
     describe("GET /users/:id", () => {
       it("should get a user by ID", async () => {
         const response = await request(app)

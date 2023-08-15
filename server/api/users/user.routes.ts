@@ -16,8 +16,10 @@ import { validateSchema } from "../../middleware/validationMiddleware";
 import {
   createUser,
   deleteUser,
+  getUser,
   getUserByEmail,
   getUserById,
+  getUsersByName,
   getUsers,
   updateUser,
 } from "./user.controller";
@@ -54,7 +56,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password } = req.body;
-      const existingUser = email && (await getUserByEmail(email));
+      const existingUser = email && (await getUser(email));
       if (!existingUser) throw new UnauthorizedError();
 
       const userData = {
@@ -97,6 +99,34 @@ router.get(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       const users = await getUsers();
+      res.status(200).send(users);
+    } catch (error: unknown) {
+      next(error);
+    }
+  }
+);
+
+router.get(
+  "/users/search",
+  authenticate,
+  adminOnly,
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    try {
+      const { id, name, email } = req.query;
+      let users = [];
+
+      if (id) {
+        const user = await getUserById(id.toString());
+        users = user ? [user] : [];
+      } else if (name) {
+        users = await getUsersByName(name.toString());
+      } else if (email) {
+        const user = await getUserByEmail(email.toString());
+        users = user ? [user] : [];
+      } else {
+        throw new ExpressError("Invalid search parameters", 400);
+      }
+
       res.status(200).send(users);
     } catch (error: unknown) {
       next(error);

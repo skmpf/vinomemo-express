@@ -5,6 +5,8 @@ import {
   createUser,
   getUserById,
   getUserByEmail,
+  getUsersByName,
+  getUser,
   getUsers,
   updateUser,
   deleteUser,
@@ -59,6 +61,16 @@ describe("User Controller", () => {
     });
   });
 
+  describe("getUser", () => {
+    it("should get a user with passwordHash by email", async () => {
+      (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser);
+
+      await expect(getUser(mockUser.email)).resolves.toEqual(mockUser);
+
+      expect(User.findOne).toHaveBeenCalledWith({ email: mockUser.email });
+    });
+  });
+
   describe("getUserById", () => {
     it("should get a user by ID", async () => {
       (User.findById as jest.Mock).mockImplementation(() => {
@@ -79,11 +91,37 @@ describe("User Controller", () => {
 
   describe("getUserByEmail", () => {
     it("should get a user by email", async () => {
-      (User.findOne as jest.Mock).mockResolvedValueOnce(mockUser);
+      (User.findOne as jest.Mock).mockImplementation(() => {
+        return {
+          ...mockUser,
+          select: jest.fn().mockReturnThis(),
+        };
+      });
 
-      await expect(getUserByEmail(mockUser.email)).resolves.toEqual(mockUser);
+      await expect(getUserByEmail(mockUser.email)).resolves.toEqual({
+        ...mockUser,
+        select: expect.any(Function),
+      });
 
       expect(User.findOne).toHaveBeenCalledWith({ email: mockUser.email });
+    });
+  });
+
+  describe("getUserByName", () => {
+    it("should get a user by email", async () => {
+      (User.findOne as jest.Mock).mockImplementation(() => {
+        return {
+          ...mockUser,
+          select: jest.fn().mockReturnThis(),
+        };
+      });
+
+      await expect(getUsersByName(mockUser.name)).resolves.toEqual({
+        ...mockUser,
+        select: expect.any(Function),
+      });
+
+      expect(User.findOne).toHaveBeenCalledWith({ name: mockUser.name });
     });
   });
 
