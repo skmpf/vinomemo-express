@@ -160,6 +160,60 @@ describe("User API", () => {
       });
     });
 
+    describe("GET /users/me", () => {
+      it("should get the current user", async () => {
+        const response = await request(app)
+          .get("/users/me")
+          .set("Authorization", `Bearer ${userToken}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toHaveProperty("name");
+        expect(response.body).toHaveProperty("email");
+      });
+
+      it("should return 401 if no token is provided", async () => {
+        const response = await request(app).get("/users/me");
+
+        expect(response.statusCode).toBe(401);
+        expect(response.text).toBe(
+          JSON.stringify({
+            success: false,
+            status: 401,
+            message: "Unauthorized - No JWT",
+            stack: {},
+          })
+        );
+      });
+
+      it("should return 401 if token is invalid", async () => {
+        const response = await request(app)
+          .get("/users/me")
+          .set("Authorization", `Bearer ${userToken}invalid`);
+
+        expect(response.statusCode).toBe(401);
+        expect(response.text).toBe(
+          JSON.stringify({
+            success: false,
+            status: 401,
+            message: "invalid signature",
+            stack: {},
+          })
+        );
+      });
+
+      it("should return null if user is not found", async () => {
+        jest.spyOn(userController, "getUserById").mockResolvedValueOnce(null);
+
+        const response = await request(app)
+          .get("/users/me")
+          .set("Authorization", `Bearer ${userToken}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).not.toHaveProperty("name");
+        expect(response.body).not.toHaveProperty("email");
+      });
+    });
+
     describe("GET /users/:id", () => {
       it("should get a user by ID", async () => {
         const response = await request(app)
