@@ -8,6 +8,11 @@ export const getNoteById = async (noteId: string) =>
 
 export const getNotes = async () => await Note.find();
 
+export const getNotesByName = async (name: string) => {
+  const regex = new RegExp(name, "i");
+  return await Note.find({ "information.name": regex });
+};
+
 export const getNotesByUserId = async (userId: string) =>
   await Note.find({ creator: userId });
 

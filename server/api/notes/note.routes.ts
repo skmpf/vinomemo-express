@@ -6,6 +6,7 @@ import {
   getNotesByUserId,
   getNotes,
   updateNote,
+  getNotesByName,
 } from "./note.controller";
 import {
   adminOnly,
@@ -16,6 +17,7 @@ import {
 import { validateSchema } from "../../middleware/validationMiddleware";
 import { noteSchema } from "../../middleware/validationSchema";
 import { CustomRequest } from "../../types/express";
+import { ExpressError } from "../../middleware/errorMiddleware";
 const router = express.Router();
 
 router.post(
@@ -39,6 +41,22 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const notes = await getNotes();
+      res.status(200).send(notes);
+    } catch (error: unknown) {
+      next(error);
+    }
+  }
+);
+
+router.get(
+  "/notes/search",
+  authenticate,
+  adminOnly,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { name } = req.query;
+      if (!name) throw new ExpressError("Invalid search parameters", 400);
+      const notes = await getNotesByName(name.toString());
       res.status(200).send(notes);
     } catch (error: unknown) {
       next(error);
