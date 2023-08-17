@@ -107,7 +107,7 @@ describe("User Controller", () => {
     });
   });
 
-  describe("getUserByName", () => {
+  describe("getUsersByName", () => {
     it("should get a user by email", async () => {
       (User.findOne as jest.Mock).mockImplementation(() => {
         return {

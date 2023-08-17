@@ -233,7 +233,7 @@ describe("User API", () => {
       });
 
       it("should get a user by name", async () => {
-        jest.spyOn(userController, "getUserByName").mockResolvedValueOnce({
+        jest.spyOn(userController, "getUsersByName").mockResolvedValueOnce({
           ...mockUser,
           _id: userId,
         } as any);
