@@ -21,12 +21,10 @@ app.use(
   })
 );
 
-if (
-  process.env.NODE_ENV === "development" ||
-  process.env.NODE_ENV === "production"
-) {
+process.env.NODE_ENV === "development" &&
+  mongoose.connect(process.env.MONGODB_URI_DEV!);
+process.env.NODE_ENV === "production" &&
   mongoose.connect(process.env.MONGODB_URI!);
-}
 
 app.use(logHandler);
 app.use(bodyParser.json());
