@@ -228,8 +228,9 @@ describe("User API", () => {
           .set("Authorization", `Bearer ${userToken}`);
 
         expect(response.statusCode).toBe(200);
-        expect(response.body).toHaveProperty("name");
-        expect(response.body).toHaveProperty("email");
+        expect(response.body).toBeInstanceOf(Array);
+        expect(response.body[0]).toHaveProperty("name");
+        expect(response.body[0]).toHaveProperty("email");
       });
 
       it("should get a user by name", async () => {
@@ -258,8 +259,9 @@ describe("User API", () => {
           .set("Authorization", `Bearer ${userToken}`);
 
         expect(response.statusCode).toBe(200);
-        expect(response.body).toHaveProperty("name");
-        expect(response.body).toHaveProperty("email");
+        expect(response.body).toBeInstanceOf(Array);
+        expect(response.body[0]).toHaveProperty("name");
+        expect(response.body[0]).toHaveProperty("email");
       });
 
       it("should return 400 if no valid search parameter is provided", async () => {
