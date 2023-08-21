@@ -1,4 +1,5 @@
 import express, { Express, Request, Response } from "express";
+import helmet from "helmet";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
@@ -20,6 +21,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(helmet());
 
 process.env.NODE_ENV === "development" &&
   mongoose.connect(process.env.MONGODB_URI_DEV!);
